@@ -1,5 +1,6 @@
 
 var cls = require("./lib/class"),
+log = require('loglevel'),
     _ = require("underscore");
 
 module.exports = Metrics = Class.extend({

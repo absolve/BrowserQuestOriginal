@@ -1,7 +1,7 @@
 
 var cls = require("./lib/class"),
     _ = require("underscore"),
-    Log = require('log'),
+    log = require('loglevel'),
     Entity = require('./entity'),
     Character = require('./character'),
     Mob = require('./mob'),
@@ -150,7 +150,7 @@ module.exports = World = cls.Class.extend({
     
     run: function(mapFilePath) {
         var self = this;
-        
+        console.log("======"+mapFilePath);
         this.map = new Map(mapFilePath);
 
         this.map.ready(function() {

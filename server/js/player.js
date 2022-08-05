@@ -5,6 +5,7 @@ var cls = require("./lib/class"),
     Utils = require("./utils"),
     Properties = require("./properties"),
     Formulas = require("./formulas"),
+    log = require('loglevel'),
     check = require("./format").check,
     Types = require("../../shared/js/gametypes");
 

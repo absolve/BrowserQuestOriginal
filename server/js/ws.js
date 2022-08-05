@@ -9,6 +9,7 @@ var cls = require("./lib/class"),
     _ = require('underscore'),
     BISON = require('bison'),
     WS = {},
+    log = require('loglevel'),
     useBison = false;
 
 module.exports = WS;
@@ -107,10 +108,14 @@ WS.socketIOServer = Server.extend({
         self.port = port;
         var app = require('express')();
         var http = require('http').Server(app);
-        self.io = require('socket.io')(http);
-
+        // self.io = require('socket.io')(http);
+        self.io = require('socket.io')(http,{cors:{origin: 'http://localhost:9000',
+     
+        credentials: true,}
+            });
 
         self.io.on('connection', function(connection){
+            // console.log("a user connected")
           log.info('a user connected');
 
           connection.remoteAddress = connection.handshake.address.address

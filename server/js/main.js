@@ -1,12 +1,14 @@
 
 var fs = require('fs'),
+log  = require('loglevel'),
     Metrics = require('./metrics');
  
 
 function main(config) {
+    console.log("main")
     var ws = require("./ws"),
         WorldServer = require("./worldserver"),
-        Log = require('log'),
+       
         _ = require('underscore'),
         server = new ws.socketIOServer(config.host, config.port),
         metrics = config.metrics_enabled ? new Metrics(config) : null;
@@ -24,16 +26,22 @@ function main(config) {
                 });
             }
         }, 1000);
-    
+    // console.log(Log)
     switch(config.debug_level) {
         case "error":
-            log = new Log(Log.ERROR); break;
+            log.setLevel("error")
+            // log = new Log(Log.ERROR); 
+            break;
         case "debug":
-            log = new Log(Log.DEBUG); break;
+            log.setLevel("debug")
+            // log = new Log(Log.DEBUG); break;
         case "info":
-            log = new Log(Log.INFO); break;
+            log.setLevel("info")
+            // log = new Log(Log.INFO);
+             break;
     };
     
+    // console.log("Starting BrowserQuest game server...")
     log.info("Starting BrowserQuest game server...");
     
     server.onConnect(function(connection) {
@@ -62,6 +70,7 @@ function main(config) {
     });
 
     server.onError(function() {
+        // console.log(Array.prototype.join.call(arguments, ", "))
         log.error(Array.prototype.join.call(arguments, ", "));
     });
     
@@ -76,6 +85,7 @@ function main(config) {
 
     _.each(_.range(config.nb_worlds), function(i) {
         var world = new WorldServer('world'+ (i+1), config.nb_players_per_world, server);
+        // console.log(22222222222)
         world.run(config.map_filepath);
         worlds.push(world);
         if(metrics) {
@@ -95,7 +105,8 @@ function main(config) {
     }
     
     process.on('uncaughtException', function (e) {
-        log.error('uncaughtException: ' + e);
+        log.warn('uncaughtException: ' + e);
+        // console.log('uncaughtException: ' + e)
     });
 }
 
@@ -131,8 +142,10 @@ process.argv.forEach(function (val, index, array) {
 getConfigFile(defaultConfigPath, function(defaultConfig) {
     getConfigFile(customConfigPath, function(localConfig) {
         if(localConfig) {
+            console.log("localConfig"+localConfig)
             main(localConfig);
         } else if(defaultConfig) {
+            console.log("defaultConfig")
             main(defaultConfig);
         } else {
             console.error("Server cannot start without any configuration file.");
