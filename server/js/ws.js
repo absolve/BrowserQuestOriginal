@@ -26,7 +26,7 @@ var Server = cls.Class.extend({
         this.port = port;
     },
     
-    onConnect: function(callback) {
+    onConnect: function(callback) {  //连接回调函数
         this.connection_callback = callback;
     },
     
@@ -42,7 +42,7 @@ var Server = cls.Class.extend({
         _.each(this._connections, callback);
     },
     
-    addConnection: function(connection) {
+    addConnection: function(connection) {  //添加一个连接
         this._connections[connection.id] = connection;
     },
     
@@ -143,7 +143,7 @@ WS.socketIOServer = Server.extend({
         });
     },
 
-    _createId: function() {
+    _createId: function() { //创建一个id
         return '5' + Utils.random(99) + '' + (this._counter++);
     },
     
@@ -192,7 +192,7 @@ WS.socketIOConnection = Connection.extend({
         throw "Not implemented";
     },
     
-    send: function(message) {
+    send: function(message) { //发送数据
         this._connection.emit("message", message);
     },
     

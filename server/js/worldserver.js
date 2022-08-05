@@ -150,7 +150,7 @@ module.exports = World = cls.Class.extend({
     
     run: function(mapFilePath) {
         var self = this;
-        console.log("======"+mapFilePath);
+        // console.log("======"+mapFilePath);
         this.map = new Map(mapFilePath);
 
         this.map.ready(function() {
@@ -191,7 +191,7 @@ module.exports = World = cls.Class.extend({
         
         var regenCount = this.ups * 2;
         var updateCount = 0;
-        setInterval(function() {
+        setInterval(function() { //设置定时器
             self.processGroups();
             self.processQueues();
             

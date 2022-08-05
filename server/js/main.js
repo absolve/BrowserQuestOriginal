@@ -12,7 +12,7 @@ function main(config) {
         _ = require('underscore'),
         server = new ws.socketIOServer(config.host, config.port),
         metrics = config.metrics_enabled ? new Metrics(config) : null;
-        worlds = [],
+        worlds = [],  //世界数组
         lastTotalPlayers = 0,
         checkPopulationInterval = setInterval(function() {
             if(metrics && metrics.isReady) {
@@ -43,7 +43,7 @@ function main(config) {
     
     // console.log("Starting BrowserQuest game server...")
     log.info("Starting BrowserQuest game server...");
-    
+    //设置回调函数
     server.onConnect(function(connection) {
         var world, // the one in which the player will be spawned
             connect = function() {
@@ -85,7 +85,6 @@ function main(config) {
 
     _.each(_.range(config.nb_worlds), function(i) {
         var world = new WorldServer('world'+ (i+1), config.nb_players_per_world, server);
-        // console.log(22222222222)
         world.run(config.map_filepath);
         worlds.push(world);
         if(metrics) {

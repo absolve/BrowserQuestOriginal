@@ -13,7 +13,7 @@ module.exports = Player = Character.extend({
     init: function(connection, worldServer) {
         var self = this;
         
-        this.server = worldServer;
+        this.server = worldServer; //世界服务器
         this.connection = connection;
 
         this._super(this.connection.id, "player", Types.Entities.WARRIOR, 0, 0, "");
@@ -25,7 +25,7 @@ module.exports = Player = Character.extend({
         this.formatChecker = new FormatChecker();
         this.disconnectTimeout = null;
         
-        this.connection.listen(function(message) {
+        this.connection.listen(function(message) {//消息处理
 
             var action = parseInt(message[0]);
             
@@ -46,7 +46,7 @@ module.exports = Player = Character.extend({
             
             self.resetTimeout();
             
-            if(action === Types.Messages.HELLO) {
+            if(action === Types.Messages.HELLO) {  //初始
                 var name = Utils.sanitize(message[1]);
                 
                 // If name was cleared by the sanitizer, give a default name.
@@ -263,7 +263,7 @@ module.exports = Player = Character.extend({
         return basestate.concat(state);
     },
     
-    send: function(message) {
+    send: function(message) {  //发送消息
         this.connection.send(message);
     },
     
