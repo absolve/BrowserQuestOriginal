@@ -9,7 +9,7 @@ module.exports = Character = Entity.extend({
     init: function(id, type, kind, x, y) {
         this._super(id, type, kind, x, y);
         
-        this.orientation = Utils.randomOrientation();
+        this.orientation = Utils.randomOrientation();  //方向
         this.attackers = {};
         this.target = null;
     },

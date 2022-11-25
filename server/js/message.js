@@ -1,4 +1,4 @@
-
+//消息
 var cls = require("./lib/class"),
     _ = require("underscore"),
     Utils = require("./utils"),

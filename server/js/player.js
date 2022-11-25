@@ -1,4 +1,4 @@
-
+//玩家
 var cls = require("./lib/class"),
     _ = require("underscore"),
     Messages = require("./message"),

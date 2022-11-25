@@ -1,4 +1,4 @@
-
+//消息格式分析
 var _ = require('underscore'),
     Types = require("../../shared/js/gametypes");
 

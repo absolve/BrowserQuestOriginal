@@ -1,4 +1,4 @@
-
+//实体
 var cls = require("./lib/class"),
     Messages = require('./message'),
     Utils = require('./utils');

@@ -72,7 +72,7 @@ var Connection = cls.Class.extend({
         this.close_callback = callback;
     },
     
-    listen: function(callback) {
+    listen: function(callback) {  //设置回调函数
         this.listen_callback = callback;
     },
     

@@ -1,4 +1,4 @@
-
+//地图
 var cls = require('./lib/class')
     fs = require('fs'),
     _ = require('underscore'),

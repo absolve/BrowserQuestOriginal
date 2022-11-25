@@ -311,13 +311,13 @@ module.exports = World = cls.Class.extend({
         }
     },
     
-    processQueues: function() {
+    processQueues: function() { //处理消息
         var self = this,
             connection;
 
         for(var id in this.outgoingQueues) {
             if(this.outgoingQueues[id].length > 0) {
-                connection = this.server.getConnection(id);
+                connection = this.server.getConnection(id); //获取id
                 connection.send(this.outgoingQueues[id]);
                 this.outgoingQueues[id] = [];
             }

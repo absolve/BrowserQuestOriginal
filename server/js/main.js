@@ -1,4 +1,4 @@
-
+//主函数
 var fs = require('fs'),
 log  = require('loglevel'),
     Metrics = require('./metrics');
