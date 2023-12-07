@@ -12,6 +12,7 @@ var cls = require("./lib/class"),
     log = require('loglevel'),
     useBison = false;
 
+
 module.exports = WS;
 
 

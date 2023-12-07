@@ -88,7 +88,7 @@ define(['player', 'entityfactory', 'lib/bison'], function(Player, EntityFactory,
                         self.isTimeout = true;
                         return;
                     }
-                    
+                    console.log("message"+data)
                     self.receiveMessage(data);
                 });
 

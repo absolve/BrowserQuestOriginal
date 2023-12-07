@@ -26,7 +26,7 @@ function main(config) {
                 });
             }
         }, 1000);
-    // console.log(Log)
+    console.log(config.debug_level)
     switch(config.debug_level) {
         case "error":
             log.setLevel("error")

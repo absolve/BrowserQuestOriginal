@@ -18,11 +18,11 @@ var cls = require("./lib/class"),
     Types = require("../../shared/js/gametypes");
 
 // ======= GAME SERVER ========
-
+// log.setLevel("debug")
 module.exports = World = cls.Class.extend({
     init: function(id, maxPlayers, websocketServer) {
         var self = this;
-
+        log.setLevel("debug")
         this.id = id;
         this.maxPlayers = maxPlayers;
         this.server = websocketServer;
@@ -192,6 +192,7 @@ module.exports = World = cls.Class.extend({
         var regenCount = this.ups * 2;
         var updateCount = 0;
         setInterval(function() { //设置定时器
+            // console.log('process')
             self.processGroups();
             self.processQueues();
             
@@ -315,8 +316,9 @@ module.exports = World = cls.Class.extend({
         var self = this,
             connection;
 
-        for(var id in this.outgoingQueues) {
-            if(this.outgoingQueues[id].length > 0) {
+        for(var id in this.outgoingQueues) {  
+            if(this.outgoingQueues[id].length > 0) {     
+                log.debug(this.outgoingQueues[id])  
                 connection = this.server.getConnection(id); //获取id
                 connection.send(this.outgoingQueues[id]);
                 this.outgoingQueues[id] = [];
@@ -785,6 +787,7 @@ module.exports = World = cls.Class.extend({
             this.map.forEachGroup(function(id) {
                 var spawns = [];
                 if(self.groups[id].incoming.length > 0) {
+                    log.debug("processGroups"+self.groups)
                     spawns = _.each(self.groups[id].incoming, function(entity) {
                         if(entity instanceof Player) {
                             self.pushToGroup(id, new Messages.Spawn(entity), entity.id);

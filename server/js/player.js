@@ -12,7 +12,7 @@ var cls = require("./lib/class"),
 module.exports = Player = Character.extend({
     init: function(connection, worldServer) {
         var self = this;
-        
+        log.setLevel("debug")
         this.server = worldServer; //世界服务器
         this.connection = connection;
 
