@@ -24,14 +24,14 @@ module.exports = World = cls.Class.extend({
         var self = this;
         log.setLevel("debug")
         this.id = id;
-        this.maxPlayers = maxPlayers;
+        this.maxPlayers = maxPlayers;  //最大人数
         this.server = websocketServer;
-        this.ups = 50;
+        this.ups = 50;  //更新频率
         
-        this.map = null;
+        this.map = null;  //地图
         
         this.entities = {};
-        this.players = {};
+        this.players = {};    //key id value 玩家实体
         this.mobs = {};
         this.attackers = {};
         this.items = {};
@@ -42,7 +42,7 @@ module.exports = World = cls.Class.extend({
         this.chestAreas = [];
         this.groups = {};
         
-        this.outgoingQueues = {};
+        this.outgoingQueues = {}; //消息队列 key id value 数组
         
         this.itemCount = 0;
         this.playerCount = 0;
