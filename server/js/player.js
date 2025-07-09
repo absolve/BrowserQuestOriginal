@@ -247,7 +247,7 @@ module.exports = Player = Character.extend({
         return basestate.concat(state);
     },
 
-    send: function (message) {  //发送消息
+    send: function (message) {  //发送消息给客户端
         this.connection.send(message);
     },
 

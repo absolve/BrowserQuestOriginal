@@ -1,4 +1,3 @@
-
 var Types = require("../../shared/js/gametypes");
 var log = require('loglevel')
 
@@ -13,7 +12,7 @@ var Properties = {
         armor: 1,
         weapon: 1
     },
-    
+
     skeleton: {
         drops: {
             flask: 40,
@@ -25,7 +24,7 @@ var Properties = {
         armor: 2,
         weapon: 2
     },
-    
+
     goblin: {
         drops: {
             flask: 50,
@@ -37,7 +36,7 @@ var Properties = {
         armor: 2,
         weapon: 1
     },
-    
+
     ogre: {
         drops: {
             burger: 10,
@@ -50,7 +49,7 @@ var Properties = {
         armor: 3,
         weapon: 2
     },
-    
+
     spectre: {
         drops: {
             flask: 30,
@@ -62,7 +61,7 @@ var Properties = {
         armor: 2,
         weapon: 4
     },
-    
+
     deathknight: {
         drops: {
             burger: 95,
@@ -72,7 +71,7 @@ var Properties = {
         armor: 3,
         weapon: 3
     },
-    
+
     crab: {
         drops: {
             flask: 50,
@@ -84,7 +83,7 @@ var Properties = {
         armor: 2,
         weapon: 1
     },
-    
+
     snake: {
         drops: {
             flask: 50,
@@ -96,7 +95,7 @@ var Properties = {
         armor: 3,
         weapon: 2
     },
-    
+
     skeleton2: {
         drops: {
             flask: 60,
@@ -108,7 +107,7 @@ var Properties = {
         armor: 3,
         weapon: 3
     },
-    
+
     eye: {
         drops: {
             flask: 50,
@@ -120,7 +119,7 @@ var Properties = {
         armor: 3,
         weapon: 3
     },
-    
+
     bat: {
         drops: {
             flask: 50,
@@ -131,7 +130,7 @@ var Properties = {
         armor: 2,
         weapon: 1
     },
-    
+
     wizard: {
         drops: {
             flask: 50,
@@ -142,7 +141,7 @@ var Properties = {
         armor: 2,
         weapon: 6
     },
-    
+
     boss: {
         drops: {
             goldensword: 100
@@ -153,31 +152,31 @@ var Properties = {
     }
 };
 
-Properties.getArmorLevel = function(kind) {
+Properties.getArmorLevel = function (kind) {
     try {
-        if(Types.isMob(kind)) {
+        if (Types.isMob(kind)) {
             return Properties[Types.getKindAsString(kind)].armor;
         } else {
             return Types.getArmorRank(kind) + 1;
         }
-    } catch(e) {
-        log.error("No level found for armor: "+Types.getKindAsString(kind));
+    } catch (e) {
+        log.error("No level found for armor: " + Types.getKindAsString(kind));
     }
 };
 
-Properties.getWeaponLevel = function(kind) {
+Properties.getWeaponLevel = function (kind) {
     try {
-        if(Types.isMob(kind)) {
+        if (Types.isMob(kind)) {
             return Properties[Types.getKindAsString(kind)].weapon;
         } else {
             return Types.getWeaponRank(kind) + 1;
         }
-    } catch(e) {
-        log.error("No level found for weapon: "+Types.getKindAsString(kind));
+    } catch (e) {
+        log.error("No level found for weapon: " + Types.getKindAsString(kind));
     }
 };
 
-Properties.getHitPoints = function(kind) {
+Properties.getHitPoints = function (kind) {
     return Properties[Types.getKindAsString(kind)].hp;
 };
 
