@@ -7,8 +7,12 @@ fs = require('fs'),
     Checkpoint = require('./checkpoint');
 
 module.exports = Maps = cls.Class.extend({
+    /**
+     * 初始化地图加载器
+     * @param {string} filepath - 地图文件路径
+     */
     init: function (filepath) {
-        var self = this;
+        let self = this;
         // // if(filepath===undefined)return;
         this.isLoaded = false;
         // console.log("----------"+filepath)
@@ -22,6 +26,10 @@ module.exports = Maps = cls.Class.extend({
         }
     },
 
+    /**
+     * 初始化地图数据
+     * @param {Object} map - 地图JSON对象，包含地图尺寸、碰撞区域等信息
+     */
     initMap: function (map) {  //初始化地图
         this.width = map.width;
         this.height = map.height;
@@ -46,10 +54,19 @@ module.exports = Maps = cls.Class.extend({
         }
     },
 
+    /**
+     * 设置地图加载完成回调函数
+     * @param {Function} f - 回调函数
+     */
     ready: function (f) {
         this.ready_func = f;
     },
 
+    /**
+     * 将瓦片索引转换为网格坐标
+     * @param {number} tileNum - 瓦片编号
+     * @returns {Object} 包含x和y坐标的对象
+     */
     tileIndexToGridPosition: function (tileNum) {
         var x = 0,
             y = 0;
@@ -68,10 +85,19 @@ module.exports = Maps = cls.Class.extend({
         return {x: x, y: y};
     },
 
+    /**
+     * 将网格坐标转换为瓦片索引
+     * @param {number} x - x坐标
+     * @param {number} y - y坐标
+     * @returns {number} 瓦片索引
+     */
     GridPositionToTileIndex: function (x, y) {
         return (y * this.width) + x + 1;
     },
 
+    /**
+     * 生成碰撞网格
+     */
     generateCollisionGrid: function () {
         this.grid = [];
 
@@ -92,10 +118,22 @@ module.exports = Maps = cls.Class.extend({
         }
     },
 
+    /**
+     * 检查坐标是否超出边界
+     * @param {number} x - x坐标
+     * @param {number} y - y坐标
+     * @returns {boolean} 是否超出边界
+     */
     isOutOfBounds: function (x, y) {
         return x <= 0 || x >= this.width || y <= 0 || y >= this.height;
     },
 
+    /**
+     * 检查指定位置是否发生碰撞
+     * @param {number} x - x坐标
+     * @param {number} y - y坐标
+     * @returns {boolean} 是否发生碰撞
+     */
     isColliding: function (x, y) {
         if (this.isOutOfBounds(x, y)) {
             return false;
@@ -103,12 +141,21 @@ module.exports = Maps = cls.Class.extend({
         return this.grid[y][x] === 1;
     },
 
+    /**
+     * 将组ID转换为组位置
+     * @param {string} id - 组ID
+     * @returns {Object} 位置对象
+     */
     GroupIdToGroupPosition: function (id) {
         var posArray = id.split('-');
 
         return pos(parseInt(posArray[0]), parseInt(posArray[1]));
     },
 
+    /**
+     * 遍历所有组
+     * @param {Function} callback - 回调函数
+     */
     forEachGroup: function (callback) {
         var width = this.groupWidth,
             height = this.groupHeight;
@@ -120,6 +167,12 @@ module.exports = Maps = cls.Class.extend({
         }
     },
 
+    /**
+     * 根据坐标获取组ID
+     * @param {number} x - x坐标
+     * @param {number} y - y坐标
+     * @returns {string} 组ID
+     */
     getGroupIdFromPosition: function (x, y) {
         var w = this.zoneWidth,
             h = this.zoneHeight,
@@ -129,6 +182,11 @@ module.exports = Maps = cls.Class.extend({
         return gx + '-' + gy;
     },
 
+    /**
+     * 获取相邻组位置列表
+     * @param {string} id - 当前组ID
+     * @returns {Array} 相邻组位置数组
+     */
     getAdjacentGroupPositions: function (id) {
         var self = this,
             position = this.GroupIdToGroupPosition(id),
@@ -154,6 +212,11 @@ module.exports = Maps = cls.Class.extend({
         });
     },
 
+    /**
+     * 遍历相邻组
+     * @param {string} groupId - 当前组ID
+     * @param {Function} callback - 回调函数
+     */
     forEachAdjacentGroup: function (groupId, callback) {
         if (groupId) {
             _.each(this.getAdjacentGroupPositions(groupId), function (pos) {
@@ -162,6 +225,10 @@ module.exports = Maps = cls.Class.extend({
         }
     },
 
+    /**
+     * 初始化连接的组
+     * @param {Array} doors - 门的配置数组
+     */
     initConnectedGroups: function (doors) {
         var self = this;
 
@@ -179,6 +246,10 @@ module.exports = Maps = cls.Class.extend({
         });
     },
 
+    /**
+     * 初始化检查点
+     * @param {Array} cpList - 检查点列表
+     */
     initCheckpoints: function (cpList) {
         var self = this;
 
@@ -194,10 +265,19 @@ module.exports = Maps = cls.Class.extend({
         });
     },
 
+    /**
+     * 获取指定ID的检查点
+     * @param {string} id - 检查点ID
+     * @returns {Object} 检查点对象
+     */
     getCheckpoint: function (id) {
         return this.checkpoints[id];
     },
 
+    /**
+     * 获取随机起始位置
+     * @returns {Object} 随机起始位置坐标
+     */
     getRandomStartingPosition: function () {
         var nbAreas = _.size(this.startingAreas);
         let i = Utils.randomInt(0, nbAreas - 1);
@@ -207,10 +287,22 @@ module.exports = Maps = cls.Class.extend({
     }
 });
 
+/**
+ * 创建位置对象
+ * @param {number} x - x坐标
+ * @param {number} y - y坐标
+ * @returns {Object} 位置对象
+ */
 var pos = function (x, y) {
     return {x: x, y: y};
 };
 
+/**
+ * 比较两个位置是否相等
+ * @param {Object} pos1 - 第一个位置对象
+ * @param {Object} pos2 - 第二个位置对象
+ * @returns {boolean} 位置是否相等
+ */
 var equalPositions = function (pos1, pos2) {
     return pos1.x === pos2.x && pos2.y === pos2.y;
 };

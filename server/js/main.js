@@ -4,6 +4,10 @@ var fs = require('fs'),
     Metrics = require('./metrics');
 
 
+/**
+ * 主函数 - 初始化并启动游戏服务器
+ * @param {Object} config - 服务器配置对象
+ */
 function main(config) {
     console.log("main")
     var ws = require("./ws"),
@@ -30,7 +34,7 @@ function main(config) {
     switch (config.debug_level) {
         case "error":
             log.setLevel("error")
-            // log = new Log(Log.ERROR); 
+            // log = new Log(Log.ERROR);
             break;
         case "debug":
             log.setLevel("debug")
@@ -41,9 +45,10 @@ function main(config) {
             break;
     }
 
-    // console.log("Starting BrowserQuest game server...")
+    // 启动游戏服务器日志记录
     log.info("Starting BrowserQuest game server...");
-    //设置回调函数
+
+    // 设置连接回调函数
     server.onConnect(function (connection) {
         var world, // the one in which the player will be spawned
             connect = function () {
@@ -84,6 +89,7 @@ function main(config) {
         metrics.updateWorldDistribution(getWorldDistribution(worlds));
     };
 
+    // 创建指定数量的世界实例
     _.each(_.range(config.nb_worlds), function (i) {
         var world = new WorldServer('world' + (i + 1), config.nb_players_per_world, server);
         world.run(config.map_filepath);
@@ -110,6 +116,11 @@ function main(config) {
     });
 }
 
+/**
+ * 获取世界分布信息
+ * @param {Array} worlds - 世界数组
+ * @returns {Array} 包含每个世界玩家数量的数组
+ */
 function getWorldDistribution(worlds) {
     var distribution = [];
 
@@ -119,6 +130,11 @@ function getWorldDistribution(worlds) {
     return distribution;
 }
 
+/**
+ * 读取配置文件
+ * @param {string} path - 配置文件路径
+ * @param {Function} callback - 回调函数，接收解析后的配置对象
+ */
 function getConfigFile(path, callback) {
     fs.readFile(path, 'utf8', function (err, json_string) {
         if (err) {
@@ -133,12 +149,14 @@ function getConfigFile(path, callback) {
 var defaultConfigPath = './server/config.json',
     customConfigPath = './server/config_local.json';
 
+// 解析命令行参数中的自定义配置文件路径
 process.argv.forEach(function (val, index, array) {
     if (index === 2) {
         customConfigPath = val;
     }
 });
 
+// 加载配置文件并启动主函数
 getConfigFile(defaultConfigPath, function (defaultConfig) {
     getConfigFile(customConfigPath, function (localConfig) {
         if (localConfig) {
@@ -153,3 +171,4 @@ getConfigFile(defaultConfigPath, function (defaultConfig) {
         }
     });
 });
+

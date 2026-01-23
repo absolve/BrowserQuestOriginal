@@ -1,7 +1,20 @@
-
+/**
+ * 定义精灵类模块，用于处理游戏中的精灵图像、动画和特殊效果
+ * @param {Object} $ - jQuery库对象
+ * @param {Object} Animation - 动画类构造函数
+ * @param {Object} sprites - 精灵数据配置对象
+ */
 define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
 
+    /**
+     * 精灵类构造函数，用于创建和管理游戏精灵
+     */
     var Sprite = Class.extend({
+        /**
+         * 初始化精灵实例
+         * @param {string} name - 精灵名称
+         * @param {number} scale - 精灵缩放比例
+         */
         init: function(name, scale) {
         	this.name = name;
         	this.scale = scale;
@@ -11,6 +24,10 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
             this.loadJSON(sprites[name]);
         },
         
+        /**
+         * 根据JSON数据加载精灵配置信息
+         * @param {Object} data - 包含精灵配置信息的JSON对象
+         */
         loadJSON: function(data) {
     		this.id = data.id;
     		this.filepath = "img/" + this.scale + "/" + this.id + ".png";
@@ -23,6 +40,9 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     		this.load();
     	},
 
+        /**
+         * 加载精灵图像文件
+         */
         load: function() {
         	var self = this;
 
@@ -38,6 +58,10 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
         	};
         },
     
+        /**
+         * 创建精灵的所有动画实例
+         * @returns {Object} 包含所有动画实例的对象，以动画名称为键
+         */
         createAnimations: function() {
             var animations = {};
         
@@ -49,6 +73,10 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	    return animations;
     	},
 	
+    	/**
+         * 创建受伤状态的精灵图像（白色闪烁效果）
+         * 将原图的颜色修改为红白相间的颜色来表示受伤状态
+         */
     	createHurtSprite: function() {
     	    var canvas = document.createElement('canvas'),
     	        ctx = canvas.getContext('2d'),
@@ -86,10 +114,18 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	    }
         },
 	
+    	/**
+         * 获取受伤状态的精灵对象
+         * @returns {Object} 受伤状态的精灵对象
+         */
     	getHurtSprite: function() {
     	    return this.whiteSprite;
     	},
 	
+    	/**
+         * 创建精灵的轮廓阴影效果
+         * 通过检测相邻像素来生成精灵周围的半透明轮廓
+         */
     	createSilhouette: function() {
     	    var canvas = document.createElement('canvas'),
     	        ctx = canvas.getContext('2d'),
@@ -104,10 +140,12 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	    finalData = ctx.getImageData(0, 0, width, height);
     	    fdata = finalData.data;
 	    
+    	    // 计算像素在一维数组中的索引位置
     	    var getIndex = function(x, y) {
     	        return ((width * (y-1)) + x - 1) * 4;
     	    };
 	    
+    	    // 根据一维数组索引计算对应的二维坐标位置
     	    var getPosition = function(i) {
     	        var x, y;
 	        
@@ -118,6 +156,7 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	        return { x: x, y: y };
     	    };
 	    
+    	    // 检查指定位置的像素是否有相邻的非空白像素
     	    var hasAdjacentPixel = function(i) {
     	        var pos = getPosition(i);
 	        
@@ -136,6 +175,7 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	        return false;
     	    };
 	    
+    	    // 判断指定索引位置是否为空白像素（RGBA全为0）
     	    var isBlankPixel = function(i) {
     	        if(i < 0 || i >= data.length) {
     	            return true;
@@ -143,6 +183,7 @@ define(['jquery', 'animation', 'sprites'], function($, Animation, sprites) {
     	        return data[i] === 0 && data[i+1] === 0 && data[i+2] === 0 && data[i+3] === 0;
     	    };
 	    
+    	    // 遍历所有像素，为边界空白像素添加轮廓颜色
     	    for(var i=0; i < data.length; i += 4) {
     	        if(isBlankPixel(i) && hasAdjacentPixel(i)) {
     	            fdata[i] = fdata[i+1] = 255;
