@@ -147,8 +147,12 @@ module.exports = World = cls.Class.extend({
         });
     },
 
+    /**
+     * 启动世界运行函数
+     * @param {string} mapFilePath - 地图文件路径
+     */
     run: function (mapFilePath) { //启动函数
-        var self = this;
+        let self = this;
         // console.log("======"+mapFilePath);
         this.map = new Map(mapFilePath);
 
@@ -188,6 +192,7 @@ module.exports = World = cls.Class.extend({
             });
         });
 
+        // 设置游戏循环定时器，控制游戏更新频率
         var regenCount = this.ups * 2;
         var updateCount = 0;
         setInterval(function () { //设置定时器
@@ -274,10 +279,18 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 向指定群组中的所有玩家推送消息（除了被忽略的玩家）
+     * @param {string} groupId - 目标群组的ID
+     * @param {object} message - 要推送的消息对象
+     * @param {string} ignoredPlayer - 需要忽略的玩家ID（可选）
+     * @returns {void}
+     */
     pushToGroup: function (groupId, message, ignoredPlayer) {
         var self = this,
             group = this.groups[groupId];
 
+        // 遍历群组中的所有玩家并推送消息（跳过被忽略的玩家）
         if (group) {
             _.each(group.players, function (playerId) {
                 if (playerId != ignoredPlayer) {
@@ -289,13 +302,28 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 向相邻的群组推送消息
+     * 遍历指定群组的所有相邻群组，并向每个相邻群组推送相同的消息（除了被忽略的玩家）
+     * @param {string|number} groupId - 当前群组ID，用于查找相邻群组
+     * @param {any} message - 要推送的消息内容
+     * @param {object} ignoredPlayer - 需要在推送时忽略的玩家对象
+     * @returns {void}
+     */
     pushToAdjacentGroups: function (groupId, message, ignoredPlayer) {
         var self = this;
+        // 遍历所有相邻群组并推送消息
         self.map.forEachAdjacentGroup(groupId, function (id) {
             self.pushToGroup(id, message, ignoredPlayer);
         });
     },
 
+    /**
+     * 将消息推送到玩家最近离开的所有群组中
+     * 这个方法用于处理玩家离开群组后，将消息发送到那些不再更新的群组
+     * @param {Object} player - 玩家对象，包含recentlyLeftGroups属性
+     * @param {Object} message - 要推送的消息对象
+     */
     pushToPreviousGroups: function (player, message) {
         var self = this;
 
@@ -307,7 +335,14 @@ module.exports = World = cls.Class.extend({
         player.recentlyLeftGroups = [];
     },
 
+    /**
+     * 向所有玩家广播消息，除了被忽略的玩家
+     * @param {Object} message - 要广播的消息对象
+     * @param {string|number} ignoredPlayer - 需要忽略的玩家ID，该玩家不会收到此消息
+     * @returns {void}
+     */
     pushBroadcast: function (message, ignoredPlayer) {
+        // 遍历所有输出队列，向除被忽略玩家外的所有玩家发送序列化后的消息
         for (var id in this.outgoingQueues) {
             if (id != ignoredPlayer) {
                 this.outgoingQueues[id].push(message.serialize());
@@ -315,11 +350,17 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 处理 outgoingQueues 中的消息队列，将待发送的消息通过对应的连接发送出去
+     * 遍历所有连接ID，检查每个连接的出站消息队列，如果有消息则获取对应连接并发送
+     */
     processQueues: function () { //处理消息
-        var self = this,
+        let self = this,
             connection;
 
+        // 遍历所有连接的出站消息队列
         for (var id in this.outgoingQueues) {
+            // 检查当前连接的消息队列是否为空
             if (this.outgoingQueues[id].length > 0) {
                 log.debug(this.outgoingQueues[id])
                 connection = this.server.getConnection(id); //获取id
@@ -329,22 +370,36 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 添加实体到系统中
+     * @param {Object} entity - 要添加的实体对象，必须包含id属性
+     * @returns {void}
+     */
     addEntity: function (entity) { //添加实体
         this.entities[entity.id] = entity;
         this.handleEntityGroupMembership(entity);
     },
 
+    /**
+     * 移除游戏中的实体对象
+     * @param {Object} entity - 要被移除的实体对象
+     * @returns {void}
+     */
     removeEntity: function (entity) {  //移除实体
+        // 从entities集合中删除实体
         if (entity.id in this.entities) {
             delete this.entities[entity.id];
         }
+        // 从mobs集合中删除实体
         if (entity.id in this.mobs) {
             delete this.mobs[entity.id];
         }
+        // 从items集合中删除实体
         if (entity.id in this.items) {
             delete this.items[entity.id];
         }
 
+        // 如果是怪物类型实体，清理相关的仇恨和攻击链接
         if (entity.type === "mob") {
             this.clearMobAggroLink(entity);
             this.clearMobHateLinks(entity);
@@ -355,18 +410,35 @@ module.exports = World = cls.Class.extend({
         log.debug("Removed " + Types.getKindAsString(entity.kind) + " : " + entity.id);
     },
 
+    /**
+     * 添加玩家到游戏中
+     * @param {Object} player - 玩家对象，包含玩家的相关信息和ID
+     * @returns {void}
+     */
     addPlayer: function (player) {  //添加玩家
+        // 将玩家添加到实体管理器中
         this.addEntity(player);
+        // 在玩家集合中注册该玩家
         this.players[player.id] = player;
+        // 为该玩家创建消息队列
         this.outgoingQueues[player.id] = [];  //消息队列
 
         //log.info("Added player : " + player.id);
     },
 
+    /**
+     * 从游戏中移除玩家
+     * @param {Object} player - 要移除的玩家对象
+     * @returns {void}
+     */
     removePlayer: function (player) {
+        // 广播玩家消失消息给其他玩家
         player.broadcast(player.despawn());
+        // 从实体列表中移除该玩家
         this.removeEntity(player);
+        // 从玩家映射表中删除该玩家
         delete this.players[player.id];
+        // 删除该玩家的输出队列
         delete this.outgoingQueues[player.id];
     },
 
@@ -694,6 +766,11 @@ module.exports = World = cls.Class.extend({
         this.zoneGroupsReady = true;
     },
 
+    /**
+     * 从组中移除实体
+     * @param {Object} entity - 要从组中移除的实体对象
+     * @returns {Array} oldGroups - 包含被移除实体之前所属组ID的数组
+     */
     removeFromGroups: function (entity) {
         var self = this,
             oldGroups = [];
@@ -701,12 +778,14 @@ module.exports = World = cls.Class.extend({
         if (entity && entity.group) {
 
             var group = this.groups[entity.group];
+            // 如果是玩家类型实体，从组的玩家列表中移除
             if (entity instanceof Player) {
                 group.players = _.reject(group.players, function (id) {
                     return id === entity.id;
                 });
             }
 
+            // 遍历相邻组，从相邻组的实体映射中删除当前实体
             this.map.forEachAdjacentGroup(entity.group, function (id) {
                 if (entity.id in self.groups[id].entities) {
                     delete self.groups[id].entities[entity.id];
@@ -743,17 +822,26 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 将实体添加到指定的组中
+     * @param {Object} entity - 要添加的实体对象
+     * @param {string|number} groupId - 目标组的ID
+     * @returns {Array} 返回实体被添加到的新组ID数组
+     */
     addToGroup: function (entity, groupId) {
         var self = this,
             newGroups = [];
 
+        // 检查实体、组ID是否存在且该组在当前系统中存在
         if (entity && groupId && (groupId in this.groups)) {
+            // 遍历相邻的组，将实体添加到每个相邻组中
             this.map.forEachAdjacentGroup(groupId, function (id) {
                 self.groups[id].entities[entity.id] = entity;
                 newGroups.push(id);
             });
             entity.group = groupId;
 
+            // 如果实体是玩家类型，将其ID添加到对应组的玩家列表中
             if (entity instanceof Player) {
                 this.groups[groupId].players.push(entity.id);
             }
@@ -768,16 +856,27 @@ module.exports = World = cls.Class.extend({
         });
     },
 
+    /**
+     * 处理实体的群组成员身份变更
+     * 检查实体是否需要从当前群组移除并加入新群组
+     * @param {Object} entity - 需要处理群组成员身份的实体对象
+     * @returns {boolean} - 如果实体的群组发生了变化则返回true，否则返回false
+     */
     handleEntityGroupMembership: function (entity) {
         var hasChangedGroups = false;
         if (entity) {
+            // 根据实体当前位置获取应属于的群组ID
             var groupId = this.map.getGroupIdFromPosition(entity.x, entity.y);
             if (!entity.group || (entity.group && entity.group !== groupId)) {
                 hasChangedGroups = true;
+                // 将实体作为新成员添加到目标群组
                 this.addAsIncomingToGroup(entity, groupId);
+                // 从旧群组中移除实体
                 var oldGroups = this.removeFromGroups(entity);
+                // 将实体添加到新群组
                 var newGroups = this.addToGroup(entity, groupId);
 
+                // 计算并记录实体最近离开的群组
                 if (_.size(oldGroups) > 0) {
                     entity.recentlyLeftGroups = _.difference(oldGroups, newGroups);
                     log.debug("group diff: " + entity.recentlyLeftGroups);
@@ -787,38 +886,65 @@ module.exports = World = cls.Class.extend({
         return hasChangedGroups;
     },
 
+    /**
+     * 处理游戏中的组群更新逻辑
+     * 检查是否有准备好的区域组，如果有则遍历每个组并处理其中的传入实体
+     * 将传入的实体生成Spawn消息并推送到对应组中
+     * @param {none} 无参数
+     * @returns {void} 无返回值
+     */
     processGroups: function () {
-        var self = this;
+        let self = this;
 
+        // 检查区域组是否已准备好进行处理
         if (this.zoneGroupsReady) {
+            // 遍历地图中的所有组
             this.map.forEachGroup(function (id) {
                 var spawns = [];
+                // 检查当前组是否有传入的实体需要处理
                 if (self.groups[id].incoming.length > 0) {
                     log.debug("processGroups" + self.groups)
+                    // 遍历传入实体数组，为每个实体创建Spawn消息
                     spawns = _.each(self.groups[id].incoming, function (entity) {
+                        // 根据实体类型（玩家或其他）创建相应的Spawn消息并推送到组中
                         if (entity instanceof Player) {
                             self.pushToGroup(id, new Messages.Spawn(entity), entity.id);
                         } else {
                             self.pushToGroup(id, new Messages.Spawn(entity));
                         }
                     });
+                    // 清空已处理的传入实体列表
                     self.groups[id].incoming = [];
                 }
             });
         }
     },
 
-    moveEntity: function (entity, x, y) {//实体移动
+    /**
+     * 移动实体到指定位置
+     * @param {Object} entity - 要移动的实体对象
+     * @param {number} x - 目标x坐标
+     * @param {number} y - 目标y坐标
+     * @returns {void}
+     */
+    moveEntity: function (entity, x, y) {
+        // 实体移动
         if (entity) {
             entity.setPosition(x, y);
             this.handleEntityGroupMembership(entity);
         }
     },
 
+    /**
+     * 处理物品消失逻辑
+     * @param {Object} item - 需要处理消失的物品对象
+     * @returns {void}
+     */
     handleItemDespawn: function (item) {
         var self = this;
 
         if (item) {
+            // 调用物品的消失处理方法，配置消失前的闪烁效果和回调函数
             item.handleDespawn({
                 beforeBlinkDelay: 10000,
                 blinkCallback: function () {
@@ -837,6 +963,15 @@ module.exports = World = cls.Class.extend({
 
     },
 
+    /**
+     * 处理空宝箱区域的逻辑
+     * 当指定区域存在时，在该区域创建一个宝箱并添加到游戏中，然后处理宝箱的消失逻辑
+     * @param {Object} area - 区域对象，包含宝箱的位置坐标和物品信息
+     * @param {number} area.chestX - 宝箱的X坐标
+     * @param {number} area.chestY - 宝箱的Y坐标
+     * @param {Array} area.items - 宝箱中包含的物品数组
+     * @returns {void}
+     */
     handleEmptyChestArea: function (area) {
         if (area) {
             var chest = this.addItem(this.createChest(area.chestX, area.chestY, area.items));
@@ -844,18 +979,34 @@ module.exports = World = cls.Class.extend({
         }
     },
 
+    /**
+     * 处理开启的宝箱
+     * @param {Object} chest - 宝箱对象
+     * @param {Object} player - 玩家对象
+     * @returns {void}
+     */
     handleOpenedChest: function (chest, player) {
+        // 将宝箱组推送到相邻组并让宝箱消失
         this.pushToAdjacentGroups(chest.group, chest.despawn());
         this.removeEntity(chest);
 
+        // 获取随机物品
         var kind = chest.getRandomItem();
         if (kind) {
+            // 从宝箱中添加物品到指定位置
             var item = this.addItemFromChest(kind, chest.x, chest.y);
             this.handleItemDespawn(item);
         }
     },
 
+    /**
+     * 尝试将怪物添加到宝箱区域中
+     * 遍历所有宝箱区域，检查怪物是否在某个区域内，如果是则将其添加到该区域
+     * @param {Object} mob - 要添加的怪物对象
+     * @returns {void}
+     */
     tryAddingMobToChestArea: function (mob) {
+        // 遍历所有宝箱区域，查找包含当前怪物的区域并添加
         _.each(this.chestAreas, function (area) {
             if (area.contains(mob)) {
                 area.addToArea(mob);
@@ -863,10 +1014,16 @@ module.exports = World = cls.Class.extend({
         });
     },
 
+    /**
+     * 更新人口数量信息
+     * @param {number} [totalPlayers] - 总玩家数量，如果未提供则使用服务器连接数
+     * @returns {void}
+     */
     updatePopulation: function (totalPlayers) { //更新人数
         totalPlayers = totalPlayers ? totalPlayers : this.server.connectionsCount();
 
+        // 记录人口更新日志并广播给所有客户端
         log.info("Updating population: " + this.playerCount + " " + totalPlayers)
         this.pushBroadcast(new Messages.Population(this.playerCount, totalPlayers));
-    }
+    },
 });
