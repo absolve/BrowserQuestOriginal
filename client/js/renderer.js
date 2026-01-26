@@ -198,8 +198,8 @@ function(Camera, Item, Character, Player, Timer) {
             var positions = this.game.entityGrid;
         
             if(positions) {
-                for(var i=0; i < positions.length; i += 1) {
-                    for(var j=0; j < positions[i].length; j += 1) {
+                for(let i=0; i < positions.length; i += 1) {
+                    for(let j=0; j < positions[i].length; j += 1) {
                         if(!_.isNull(positions[i][j])) {
                             this.drawCellHighlight(i, j, "rgba(50, 50, 255, 0.5)");
                         }
@@ -209,11 +209,11 @@ function(Camera, Item, Character, Player, Timer) {
         },
     
         drawPathingCells: function() {
-            var grid = this.game.pathingGrid;
-        
+            let grid = this.game.pathingGrid;
+
             if(grid && this.game.debugPathing) {
-                for(var y=0; y < grid.length; y += 1) {
-                    for(var x=0; x < grid[y].length; x += 1) {
+                for(let y=0; y < grid.length; y += 1) {
+                    for(let x=0; x < grid[y].length; x += 1) {
                         if(grid[y][x] === 1 && this.game.camera.isVisiblePosition(x, y)) {
                             this.drawCellHighlight(x, y, "rgba(50, 50, 255, 0.5)");
                         }
@@ -223,11 +223,11 @@ function(Camera, Item, Character, Player, Timer) {
         },
 
         drawSelectedCell: function() {
-            var sprite = this.game.cursors["target"],
+            let sprite = this.game.cursors["target"],
                 anim = this.game.targetAnimation,
                 os = this.upscaledRendering ? 1 : this.scale,
                 ds = this.upscaledRendering ? this.scale : 1;
-        
+
             if(this.game.selectedCellVisible) {
                 if(this.mobile || this.tablet) {
                     if(this.game.drawTarget) {
@@ -326,14 +326,21 @@ function(Camera, Item, Character, Player, Timer) {
             ctx.clearRect(x, y, h, w);
         },
 
+        /**
+         * 绘制游戏实体
+         * @param {Object} entity - 要绘制的游戏实体对象
+         * @returns {void}
+         */
         drawEntity: function(entity) {
-            var sprite = entity.sprite,
+            // 获取实体的精灵、阴影、动画等资源引用
+            let sprite = entity.sprite,
                 shadow = this.game.shadows["small"],
                 anim = entity.currentAnimation,
                 os = this.upscaledRendering ? 1 : this.scale,
                 ds = this.upscaledRendering ? this.scale : 1;
-        
+
             if(anim && sprite) {
+                // 计算精灵帧和绘制尺寸参数
                 var	frame = anim.currentFrame,
                     s = this.scale,
                     x = frame.x * os,
@@ -346,17 +353,20 @@ function(Camera, Item, Character, Player, Timer) {
                     dy = entity.y * s,
                     dw = w * ds,
                     dh = h * ds;
-            
+
+                // 处理实体淡入淡出效果
                 if(entity.isFading) {
                     this.context.save();
                     this.context.globalAlpha = entity.fadingAlpha;
                 }
-            
+
+                // 在非移动设备上绘制实体名称
                 if(!this.mobile && !this.tablet) {
                     this.drawEntityName(entity);
                 }
-            
+
                 this.context.save();
+                // 根据精灵翻转设置应用变换矩阵
                 if(entity.flipSpriteX) {
                     this.context.translate(dx + this.tilesize*s, dy);
                     this.context.scale(-1, 1);
@@ -368,21 +378,24 @@ function(Camera, Item, Character, Player, Timer) {
                 else {
                     this.context.translate(dx, dy);
                 }
-            
+
+                // 绘制可见实体及其相关元素
                 if(entity.isVisible()) {
+                    // 绘制实体阴影
                     if(entity.hasShadow()) {
                         this.context.drawImage(shadow.image, 0, 0, shadow.width * os, shadow.height * os,
                                                0,
                                                entity.shadowOffsetY * ds,
                                                shadow.width * os * ds, shadow.height * os * ds);
                     }
-                
+
                     this.context.drawImage(sprite.image, x, y, w, h, ox, oy, dw, dh);
 
+                    // 为特殊物品类型添加闪烁效果
                     if(entity instanceof Item && entity.kind !== Types.Entities.CAKE) {
-                        var sparks = this.game.sprites["sparks"],
-                            anim = this.game.sparksAnimation,
-                            frame = anim.currentFrame,
+                        var sparks = this.game.sprites["sparks"];
+                        anim = this.game.sparksAnimation;
+                        var frame = anim.currentFrame,
                             sx = sparks.width * frame.index * os,
                             sy = sparks.height * anim.row * os,
                             sw = sparks.width * os,
@@ -394,10 +407,11 @@ function(Camera, Item, Character, Player, Timer) {
                                                sw * ds, sh * ds);
                     }
                 }
-            
+
+                // 为角色绘制武器
                 if(entity instanceof Character && !entity.isDead && entity.hasWeapon()) {
                     var weapon = this.game.sprites[entity.getWeaponName()];
-        
+
                     if(weapon) {
                         var weaponAnimData = weapon.animationData[anim.name],
                             index = frame.index < weaponAnimData.length ? frame.index : frame.index % weaponAnimData.length;
@@ -412,29 +426,40 @@ function(Camera, Item, Character, Player, Timer) {
                                                ww * ds, wh * ds);
                     }
                 }
-            
+
                 this.context.restore();
-            
+
+                // 恢复淡入淡出效果的状态
                 if(entity.isFading) {
                     this.context.restore();
                 }
             }
         },
 
+        /**
+         * 绘制游戏实体
+         * 遍历所有可见的游戏实体并根据条件进行绘制
+         * @param {boolean} dirtyOnly - 是否只绘制脏标记的实体，true表示只绘制有变化的实体，false表示绘制所有实体
+         * @returns {void}
+         */
         drawEntities: function(dirtyOnly) {
             var self = this;
-        
+
+            // 遍历所有按深度排序的可见实体
             this.game.forEachVisibleEntityByDepth(function(entity) {
                 if(entity.isLoaded) {
                     if(dirtyOnly) {
+                        // 只绘制标记为脏（有变化）的实体
                         if(entity.isDirty) {
                             self.drawEntity(entity);
-                            
+
+                            // 重置实体的脏状态并保存之前的脏矩形区域
                             entity.isDirty = false;
                             entity.oldDirtyRect = entity.dirtyRect;
                             entity.dirtyRect = null;
                         }
                     } else {
+                        // 绘制所有已加载的实体
                         self.drawEntity(entity);
                     }
                 }
@@ -449,24 +474,33 @@ function(Camera, Item, Character, Player, Timer) {
             this.context.clearRect(r.x, r.y, r.w, r.h);
         },
     
+        /**
+         * 清除所有脏矩形区域，用于游戏渲染优化
+         * 遍历可见实体、动画瓦片和目标位置，清除对应的脏矩形区域
+         * @param {none}
+         * @returns {none}
+         */
         clearDirtyRects: function() {
             var self = this,
                 count = 0;
-            
+
+            // 遍历所有按深度排序的可见实体，清除其旧的脏矩形区域
             this.game.forEachVisibleEntityByDepth(function(entity) {
                 if(entity.isDirty && entity.oldDirtyRect) {
                     self.clearDirtyRect(entity.oldDirtyRect);
                     count += 1;
                 }
             });
-            
+
+            // 遍历所有动画瓦片，清除其脏矩形区域
             this.game.forEachAnimatedTile(function(tile) {
                 if(tile.isDirty) {
                     self.clearDirtyRect(tile.dirtyRect);
                     count += 1;
                 }
             });
-            
+
+            // 如果存在需要清除的目标位置，则清除对应区域
             if(this.game.clearTarget && this.lastTargetPos) {
                 var last = this.lastTargetPos;
                     rect = this.getTargetBoundingRect(last.x, last.y);
@@ -481,18 +515,25 @@ function(Camera, Item, Character, Player, Timer) {
             }
         },
         
+        /**
+         * 获取实体的边界矩形坐标
+         * 计算实体在屏幕上的实际渲染区域，考虑相机位置和缩放比例
+         * @param {Object} entity - 需要计算边界的实体对象
+         * @returns {Object} 包含实体边界信息的矩形对象，包含x, y, w, h, left, right, top, bottom属性
+         */
         getEntityBoundingRect: function(entity) {
             var rect = {},
                 s = this.scale,
                 spr;
-                
+
+            // 检查玩家是否持有武器，如果有则使用武器精灵，否则使用实体本身的精灵
             if(entity instanceof Player && entity.hasWeapon()) {
                 var weapon = this.game.sprites[entity.getWeaponName()];
                 spr = weapon;
             } else {
                 spr = entity.sprite;
             }
-    
+
             if(spr) {
                 rect.x = (entity.x + spr.offsetX - this.camera.x) * s;
                 rect.y = (entity.y + spr.offsetY - this.camera.y) * s;
@@ -506,13 +547,20 @@ function(Camera, Item, Character, Player, Timer) {
             return rect;
         },
         
+        /**
+         * 获取瓦片的边界矩形
+         * 计算指定瓦片在屏幕坐标系中的边界矩形，考虑相机位置和缩放比例
+         * @param {Object} tile - 瓦片对象，必须包含index属性表示瓦片索引
+         * @returns {Object} 返回包含x, y, w, h, left, right, top, bottom属性的矩形对象
+         */
         getTileBoundingRect: function(tile) {
             var rect = {},
                 gridW = this.game.map.width,
                 s = this.scale,
                 ts = this.tilesize,
                 cellid = tile.index;
-            
+
+            // 计算瓦片在屏幕坐标系中的位置（考虑相机偏移和缩放）
             rect.x = ((getX(cellid + 1, gridW) * ts) - this.camera.x) * s;
             rect.y = ((Math.floor(cellid / gridW) * ts) - this.camera.y) * s;
             rect.w = ts * s;
@@ -525,13 +573,21 @@ function(Camera, Item, Character, Player, Timer) {
             return rect;
         },
         
+        /**
+         * 获取目标位置的边界矩形信息
+         * 计算指定坐标位置在屏幕上的实际显示区域（考虑缩放、相机偏移等因素）
+         * @param {number} [x] - 目标X坐标，如果未提供则使用游戏选中的X坐标
+         * @param {number} [y] - 目标Y坐标，如果未提供则使用游戏选中的Y坐标
+         * @returns {Object} 包含边界矩形信息的对象，包含x, y, w, h, left, right, top, bottom属性
+         */
         getTargetBoundingRect: function(x, y) {
             var rect = {},
                 s = this.scale,
                 ts = this.tilesize,
                 tx = x || this.game.selectedX,
                 ty = y || this.game.selectedY;
-            
+
+            // 计算目标位置在屏幕上的实际坐标和尺寸
             rect.x = ((tx * ts) - this.camera.x) * s;
             rect.y = ((ty * ts) - this.camera.y) * s;
             rect.w = ts * s;
@@ -544,6 +600,12 @@ function(Camera, Item, Character, Player, Timer) {
             return rect;
         },
         
+        /**
+         * 判断两个矩形是否相交
+         * @param {Object} rect1 - 第一个矩形对象，包含left、right、top、bottom属性
+         * @param {Object} rect2 - 第二个矩形对象，包含left、right、top、bottom属性
+         * @returns {boolean} 返回true表示两个矩形相交，返回false表示不相交
+         */
         isIntersecting: function(rect1, rect2) {
             return !((rect2.left > rect1.right) ||
                      (rect2.right < rect1.left) ||
@@ -551,9 +613,15 @@ function(Camera, Item, Character, Player, Timer) {
                      (rect2.bottom < rect1.top));
         },
         
+        /**
+         * 绘制实体名称
+         * @param {Object} entity - 要绘制名称的实体对象
+         */
         drawEntityName: function(entity) {
             this.context.save();
+            // 检查实体是否有名称且为Player实例
             if(entity.name && entity instanceof Player) {
+                // 根据是否为当前玩家设置不同的颜色
                 var color = (entity.id === this.game.playerId) ? "#fcda5c" : "white";
                 this.drawText(entity.name,
                               (entity.x + 8) * this.scale,
@@ -564,47 +632,78 @@ function(Camera, Item, Character, Player, Timer) {
             this.context.restore();
         },
 
+        /**
+         * 绘制地形函数
+         * 遍历可见区域内的所有地砖，绘制非高程地砖和非动画地砖到背景层
+         * @param {none}
+         * @returns {void}
+         */
         drawTerrain: function() {
             var self = this,
                 m = this.game.map,
                 tilesetwidth = this.tileset.width / m.tilesize;
-        
+
+            // 遍历所有可见的地砖并进行绘制
             this.game.forEachVisibleTile(function (id, index) {
-                if(!m.isHighTile(id) && !m.isAnimatedTile(id)) { // Don't draw unnecessary tiles
+                if(!m.isHighTile(id) && !m.isAnimatedTile(id)) { // 不绘制不必要的地砖
                     self.drawTile(self.background, id, self.tileset, tilesetwidth, m.width, index);
                 }
             }, 1);
         },
     
+        /**
+         * 绘制动画瓦片
+         * @param {boolean} dirtyOnly - 是否只绘制脏标记的瓦片，true表示只绘制有变化的瓦片，false表示绘制所有动画瓦片
+         * @returns {void}
+         */
         drawAnimatedTiles: function(dirtyOnly) {
             var self = this,
                 m = this.game.map,
                 tilesetwidth = this.tileset.width / m.tilesize;
-        
+
+            // 重置动画瓦片计数器
             this.animatedTileCount = 0;
+
+            // 遍历所有动画瓦片并进行绘制处理
             this.game.forEachAnimatedTile(function (tile) {
                 if(dirtyOnly) {
+                    // 只绘制标记为脏（有变化）的瓦片
                     if(tile.isDirty) {
                         self.drawTile(self.context, tile.id, self.tileset, tilesetwidth, m.width, tile.index);
                         tile.isDirty = false;
                     }
                 } else {
+                    // 绘制所有动画瓦片，并增加计数器
                     self.drawTile(self.context, tile.id, self.tileset, tilesetwidth, m.width, tile.index);
                     self.animatedTileCount += 1;
                 }
             });
         },
         
+        /**
+         * 绘制脏区域的动画瓦片
+         * 该方法调用drawAnimatedTiles方法，并传入true参数来绘制需要更新的动画瓦片
+         * @param {boolean} dirty - 标识是否只绘制脏区域的动画瓦片
+         * @returns {void}
+         */
         drawDirtyAnimatedTiles: function() {
             this.drawAnimatedTiles(true);
         },
     
+        /**
+         * 绘制高程瓦片（前景瓦片）
+         * 遍历所有可见的瓦片，绘制标记为高程瓦片的瓦片到画布上
+         * @param {CanvasRenderingContext2D} ctx - 画布渲染上下文
+         */
         drawHighTiles: function(ctx) {
             var self = this,
                 m = this.game.map,
                 tilesetwidth = this.tileset.width / m.tilesize;
-        
+
+            // 重置高程瓦片计数器
             this.highTileCount = 0;
+
+            // 遍历所有可见瓦片
             this.game.forEachVisibleTile(function (id, index) {
                 if(m.isHighTile(id)) {
                     self.drawTile(ctx, id, self.tileset, tilesetwidth, m.width, index);
@@ -618,21 +717,36 @@ function(Camera, Item, Character, Player, Timer) {
             ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         },
 
+        /**
+         * 绘制并显示当前帧率(FPS)
+         * 计算每秒渲染的帧数并在屏幕上显示
+         * @param {none}
+         * @returns {none}
+         */
         drawFPS: function() {
+            // 计算当前时间与上次记录时间的时间差
             var nowTime = new Date(),
                 diffTime = nowTime.getTime() - this.lastTime.getTime();
 
+            // 如果时间差大于等于1000毫秒(1秒)，则更新FPS统计
             if (diffTime >= 1000) {
                 this.realFPS = this.frameCount;
                 this.frameCount = 0;
                 this.lastTime = nowTime;
             }
             this.frameCount++;
-        
-            //this.drawText("FPS: " + this.realFPS + " / " + this.maxFPS, 30, 30, false);
+
+            // 绘制FPS文本到屏幕指定位置
+            // 注释掉的代码是显示实际FPS和最大FPS对比
+            // 当前显示的是实际FPS数值
             this.drawText("FPS: " + this.realFPS, 30, 30, false);
         },
     
+        /**
+         * 绘制调试信息
+         * 在游戏画布上显示帧率、动画瓦片数量和高优先级瓦片数量等调试信息
+         * 只有在调试信息可见标志为true时才会执行绘制操作
+         */
         drawDebugInfo: function() {
             if(this.isDebugInfoVisible) {
                 this.drawFPS();
@@ -641,74 +755,114 @@ function(Camera, Item, Character, Player, Timer) {
             }
         },
     
+        /**
+         * 绘制战斗信息
+         * 根据当前缩放比例设置字体大小，遍历并绘制所有战斗信息项
+         * @param {Object} this - 当前对象实例，包含scale、context、game等属性
+         * @returns {void}
+         */
         drawCombatInfo: function() {
             var self = this;
-        
+
+            // 根据缩放比例设置对应的字体大小
             switch(this.scale) {
                 case 2: this.setFontSize(20); break;
                 case 3: this.setFontSize(30); break;
             }
+
+            // 遍历所有战斗信息并绘制到画布上
             this.game.infoManager.forEachInfo(function(info) {
                 self.context.save();
                 self.context.globalAlpha = info.opacity;
                 self.drawText(info.value, (info.x + 8) * self.scale, Math.floor(info.y * self.scale), true, info.fillColor, info.strokeColor);
                 self.context.restore();
             });
+
+            // 恢复初始字体设置
             this.initFont();
         },
     
+        /**
+         * 设置相机视图变换
+         * 通过平移Canvas上下文来实现相机效果，使场景相对于相机位置进行偏移显示
+         * @param {CanvasRenderingContext2D} ctx - Canvas 2D渲染上下文
+         * @returns {void}
+         */
         setCameraView: function(ctx) {
             ctx.translate(-this.camera.x * this.scale, -this.camera.y * this.scale);
         },
     
+        /**
+         * 清除画布屏幕
+         * 使用CanvasRenderingContext2D的clearRect方法清除整个画布区域
+         * @param {CanvasRenderingContext2D} ctx - Canvas的2D渲染上下文对象
+         * @returns {void}
+         */
         clearScreen: function(ctx) {
             ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         },
     
+        /**
+         * 获取玩家图像
+         * 将玩家角色、武器和阴影合成到一个canvas中，并返回PNG格式的base64数据URL
+         *
+         * @returns {string} 返回PNG格式的base64编码图像数据URL
+         */
         getPlayerImage: function() {
             var canvas = document.createElement('canvas'),
-    	        ctx = canvas.getContext('2d'),
-    	        os = this.upscaledRendering ? 1 : this.scale,
-    	        player = this.game.player,
-    	        sprite = player.getArmorSprite(),
-    	        spriteAnim = sprite.animationData["idle_down"],
-    	        // character
-    	        row = spriteAnim.row,
+        	    ctx = canvas.getContext('2d'),
+        	    os = this.upscaledRendering ? 1 : this.scale,
+        	    player = this.game.player,
+        	    sprite = player.getArmorSprite(),
+        	    spriteAnim = sprite.animationData["idle_down"],
+        	    // character
+        	    row = spriteAnim.row,
                 w = sprite.width * os,
                 h = sprite.height * os,
-    	        y = row * h,
-    	        // weapon
-    	        weapon = this.game.sprites[this.game.player.getWeaponName()],
-    	        ww = weapon.width * os,
-    	        wh = weapon.height * os,
-    	        wy = wh * row,
-    	        offsetX = (weapon.offsetX - sprite.offsetX) * os,
-    	        offsetY = (weapon.offsetY - sprite.offsetY) * os,
-    	        // shadow
-    	        shadow = this.game.shadows["small"],
-    	        sw = shadow.width * os,
-    	        sh = shadow.height * os,
-    	        ox = -sprite.offsetX * os;
-    	        oy = -sprite.offsetY * os;
-	    
-    	    canvas.width = w;
-    	    canvas.height = h;
-	    
-    	    ctx.clearRect(0, 0, w, h);
-    	    ctx.drawImage(shadow.image, 0, 0, sw, sh, ox, oy, sw, sh);
-    	    ctx.drawImage(sprite.image, 0, y, w, h, 0, 0, w, h);
+        	    y = row * h,
+        	    // weapon
+        	    weapon = this.game.sprites[this.game.player.getWeaponName()],
+        	    ww = weapon.width * os,
+        	    wh = weapon.height * os,
+        	    wy = wh * row,
+        	    offsetX = (weapon.offsetX - sprite.offsetX) * os,
+        	    offsetY = (weapon.offsetY - sprite.offsetY) * os,
+        	    // shadow
+        	    shadow = this.game.shadows["small"],
+        	    sw = shadow.width * os,
+        	    sh = shadow.height * os,
+        	    ox = -sprite.offsetX * os;
+        	    oy = -sprite.offsetY * os;
+
+        	// 设置canvas尺寸
+        	canvas.width = w;
+        	canvas.height = h;
+
+        	// 清除画布并绘制阴影、角色和武器
+        	ctx.clearRect(0, 0, w, h);
+        	ctx.drawImage(shadow.image, 0, 0, sw, sh, ox, oy, sw, sh);
+        	ctx.drawImage(sprite.image, 0, y, w, h, 0, 0, w, h);
             ctx.drawImage(weapon.image, 0, wy, ww, wh, offsetX, offsetY, ww, wh);
         
             return canvas.toDataURL("image/png");
         },
     
+        /**
+         * 渲染静态画布
+         * 该函数负责渲染背景层和在移动设备上渲染前景层的静态内容
+         * @param {none} - 该函数不接受任何参数
+         * @returns {undefined} - 该函数没有返回值
+         */
         renderStaticCanvases: function() {
+            // 渲染背景层：保存状态 -> 设置相机视图 -> 绘制地形 -> 恢复状态
             this.background.save();
                 this.setCameraView(this.background);
                 this.drawTerrain();
             this.background.restore();
-        
+
+            // 在移动或平板设备上额外渲染前景层
             if(this.mobile || this.tablet) {
+                // 清除前景屏幕并渲染高优先级瓦片
                 this.clearScreen(this.foreground);
                 this.foreground.save();
                     this.setCameraView(this.foreground);
@@ -717,7 +871,15 @@ function(Camera, Item, Character, Player, Timer) {
             }
         },
 
+        /**
+         * 渲染当前帧的主函数
+         * 根据设备类型（移动端或桌面端）调用相应的渲染方法
+         *
+         * @param {none} 无参数
+         * @returns {void} 无返回值
+         */
         renderFrame: function() {
+            // 根据设备类型选择不同的渲染方法
             if(this.mobile || this.tablet) {
                 this.renderFrameMobile();
             }
@@ -726,13 +888,19 @@ function(Camera, Item, Character, Player, Timer) {
             }
         },
     
+        /**
+         * 渲染桌面版游戏帧
+         * 负责绘制游戏场景的所有元素，包括地图、实体、UI等
+         * @param {none}
+         * @returns {void}
+         */
         renderFrameDesktop: function() {
             this.clearScreen(this.context);
-        
+
             this.context.save();
                 this.setCameraView(this.context);
                 this.drawAnimatedTiles();
-            
+
                 if(this.game.started) {
                     this.drawSelectedCell();
                     this.drawTargetCell();
@@ -744,25 +912,40 @@ function(Camera, Item, Character, Player, Timer) {
                 this.drawCombatInfo();
                 this.drawHighTiles(this.context);
             this.context.restore();
-        
-            // Overlay UI elements
+
+            // 绘制覆盖层UI元素
             this.drawCursor();
             this.drawDebugInfo();
         },
     
+        /**
+         * 渲染移动端帧画面
+         * 负责清理脏矩形区域、防止闪烁问题，并在保存和恢复上下文状态下绘制游戏元素
+         *
+         * @param {none} 无参数
+         * @returns {void} 无返回值
+         */
         renderFrameMobile: function() {
+            // 清理脏矩形区域并防止闪烁问题
             this.clearDirtyRects();
             this.preventFlickeringBug();
 
             this.context.save();
                 this.setCameraView(this.context);
-                
+
+                // 绘制需要更新的动画瓦片、选中单元格和实体
                 this.drawDirtyAnimatedTiles();
                 this.drawSelectedCell();
                 this.drawDirtyEntities();
             this.context.restore();
         },
         
+        /**
+         * 防止闪烁bug的方法
+         * 通过在特定时间间隔内执行填充操作来避免渲染过程中的闪烁问题
+         * @param {none} 该方法不接受任何参数
+         * @returns {void} 该方法没有返回值
+         */
         preventFlickeringBug: function() {
             if(this.fixFlickeringTimer.isOver(this.game.currentTime)) {
                 this.background.fillRect(0, 0, 0, 0);

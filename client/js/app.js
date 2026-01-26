@@ -1,7 +1,14 @@
-
 define(['jquery', 'storage'], function($, Storage) {
 
+    /**
+     * App类 - 主应用程序控制器
+     * 负责管理游戏启动流程、UI交互、状态管理和用户界面控制
+     */
     var App = Class.extend({
+        /**
+         * 初始化App实例
+         * 设置初始状态变量、存储对象和定时器
+         */
         init: function() {
             this.currentPage = 1;
             this.blinkInterval = null;
@@ -14,6 +21,10 @@ define(['jquery', 'storage'], function($, Storage) {
             this.$playDiv = $('.play div');
         },
         
+        /**
+         * 设置游戏实例并初始化设备类型检测
+         * @param {Object} game - 游戏实例对象
+         */
         setGame: function(game) {
             this.game = game;
             this.isMobile = this.game.renderer.mobile;
@@ -23,10 +34,18 @@ define(['jquery', 'storage'], function($, Storage) {
             this.ready = true;
         },
     
+        /**
+         * 将页面滚动到顶部位置
+         * 用于移动端浏览器地址栏隐藏
+         */
         center: function() {
             window.scrollTo(0, 1);
         },
         
+        /**
+         * 检查是否可以开始游戏
+         * @returns {boolean} 是否可以开始游戏
+         */
         canStartGame: function() {
             if(this.isDesktop) {
                 return (this.game && this.game.map && this.game.map.isLoaded);
@@ -35,6 +54,12 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
         
+        /**
+         * 尝试启动游戏
+         * 如果游戏资源未加载完成，会等待直到可以启动
+         * @param {string} username - 用户名
+         * @param {Function} starting_callback - 启动回调函数
+         */
         tryStartingGame: function(username, starting_callback) {
             var self = this,
                 $play = this.$playButton;
@@ -65,6 +90,12 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
         
+        /**
+         * 启动游戏
+         * 隐藏介绍界面并开始游戏
+         * @param {string} username - 用户名
+         * @param {Function} starting_callback - 启动回调函数
+         */
         startGame: function(username, starting_callback) {
             var self = this;
             
@@ -81,6 +112,11 @@ define(['jquery', 'storage'], function($, Storage) {
             });
         },
 
+        /**
+         * 开始游戏核心逻辑
+         * 设置服务器选项并运行游戏
+         * @param {string} username - 用户名
+         */
         start: function(username) {
             var self = this,
                 firstTimePlaying = !self.storage.hasAlreadyPlayed();
@@ -117,6 +153,11 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 设置鼠标坐标
+         * 根据容器偏移量和缩放因子计算鼠标在游戏区域内的精确位置
+         * @param {Event} event - 鼠标事件对象
+         */
         setMouseCoordinates: function(event) {
             var gamePos = $('#container').offset(),
                 scale = this.game.renderer.getScaleFactor(),
@@ -140,6 +181,10 @@ define(['jquery', 'storage'], function($, Storage) {
         	}
         },
 
+        /**
+         * 初始化生命值条
+         * 绑定生命值变化事件处理器和受伤闪烁效果
+         */
         initHealthBar: function() {
             var scale = this.game.renderer.getScaleFactor(),
                 healthMaxWidth = $("#healthbar").width() - (12 * scale);
@@ -152,6 +197,10 @@ define(['jquery', 'storage'], function($, Storage) {
         	this.game.onPlayerHurt(this.blinkHealthBar.bind(this));
         },
 
+        /**
+         * 生命值条闪烁效果
+         * 当玩家受到伤害时触发生命值条变白闪烁效果
+         */
         blinkHealthBar: function() {
             var $hitpoints = $('#hitpoints');
 
@@ -161,6 +210,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }, 500)
         },
 
+        /**
+         * 切换按钮状态
+         * 根据输入框内容启用或禁用创建角色按钮
+         */
         toggleButton: function() {
             var name = $('#parchment input').val(),
                 $play = $('#createcharacter .play');
@@ -174,6 +227,11 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 隐藏介绍界面
+         * 清理定时器并切换到游戏界面
+         * @param {Function} hidden_callback - 隐藏完成后的回调函数
+         */
         hideIntro: function(hidden_callback) {
             clearInterval(this.watchNameInputInterval);
             $('body').removeClass('intro');
@@ -183,6 +241,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }, 1000);
         },
 
+        /**
+         * 显示聊天界面
+         * 在游戏已启动状态下激活聊天功能
+         */
         showChat: function() {
             if(this.game.started) {
                 $('#chatbox').addClass('active');
@@ -191,6 +253,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 隐藏聊天界面
+         * 在游戏已启动状态下关闭聊天功能
+         */
         hideChat: function() {
             if(this.game.started) {
                 $('#chatbox').removeClass('active');
@@ -199,6 +265,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 切换说明界面显示/隐藏
+         * 处理与成就界面的互斥关系
+         */
         toggleInstructions: function() {
             if($('#achievements').hasClass('active')) {
         	    this.toggleAchievements();
@@ -207,6 +277,10 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#instructions').toggleClass('active');
         },
 
+        /**
+         * 切换成就界面显示/隐藏
+         * 处理与说明界面的互斥关系
+         */
         toggleAchievements: function() {
         	if($('#instructions').hasClass('active')) {
         	    this.toggleInstructions();
@@ -216,6 +290,10 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#achievements').toggleClass('active');
         },
 
+        /**
+         * 重置成就页面到第一页
+         * 处理页面切换动画完成后的状态重置
+         */
         resetPage: function() {
             var self = this,
                 $achievements = $('#achievements');
@@ -229,6 +307,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 初始化装备图标
+         * 根据玩家当前武器和护甲设置对应的图标背景
+         */
         initEquipmentIcons: function() {
             var scale = this.game.renderer.getScaleFactor();
             var getIconPath = function(spriteName) {
@@ -245,6 +327,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 隐藏所有打开的窗口
+         * 关闭成就、说明、关于和信用窗口
+         */
         hideWindows: function() {
             if($('#achievements').hasClass('active')) {
         	    this.toggleAchievements();
@@ -262,6 +348,12 @@ define(['jquery', 'storage'], function($, Storage) {
         	}
         },
 
+        /**
+         * 显示成就解锁通知
+         * 创建视觉通知并处理首次解锁的特殊效果
+         * @param {number} id - 成就ID
+         * @param {string} name - 成就名称
+         */
         showAchievementNotification: function(id, name) {
             var $notif = $('#achievement-notification'),
                 $name = $notif.find('.name'),
@@ -280,6 +372,11 @@ define(['jquery', 'storage'], function($, Storage) {
             }, 5000);
         },
 
+        /**
+         * 显示已解锁的成就
+         * 更新成就列表中对应成就的状态
+         * @param {number} id - 成就ID
+         */
         displayUnlockedAchievement: function(id) {
             var $achievement = $('#achievements li.achievement' + id);
 
@@ -290,6 +387,12 @@ define(['jquery', 'storage'], function($, Storage) {
             $achievement.addClass('unlocked');
         },
 
+        /**
+         * 解锁成就
+         * 触发通知显示、列表更新和计数器更新
+         * @param {number} id - 成就ID
+         * @param {string} name - 成就名称
+         */
         unlockAchievement: function(id, name) {
             this.showAchievementNotification(id, name);
             this.displayUnlockedAchievement(id);
@@ -298,6 +401,11 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#unlocked-achievements').text(nb + 1);
         },
 
+        /**
+         * 初始化成就列表
+         * 动态创建成就列表项并绑定社交分享功能
+         * @param {Array} achievements - 成就数组
+         */
         initAchievementList: function(achievements) {
             var self = this,
                 $lists = $('#lists'),
@@ -338,6 +446,11 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#total-achievements').text($('#achievements').find('li').length);
         },
 
+        /**
+         * 初始化已解锁成就
+         * 根据已解锁成就ID列表更新界面显示
+         * @param {Array} ids - 已解锁成就ID数组
+         */
         initUnlockedAchievements: function(ids) {
             var self = this;
             
@@ -347,11 +460,22 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#unlocked-achievements').text(ids.length);
         },
 
+        /**
+         * 设置成就数据
+         * 更新成就元素的名称和描述文本
+         * @param {jQuery} $el - jQuery元素对象
+         * @param {string} name - 成就名称
+         * @param {string} desc - 成就描述
+         */
         setAchievementData: function($el, name, desc) {
             $el.find('.achievement-name').html(name);
             $el.find('.achievement-description').html(desc);
         },
 
+        /**
+         * 切换信用信息显示/隐藏
+         * 处理游戏内外不同状态下的信用界面切换
+         */
         toggleCredits: function() {
             var currentState = $('#parchment').attr('class');
 
@@ -379,6 +503,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
         
+        /**
+         * 切换关于信息显示/隐藏
+         * 处理游戏内外不同状态下的关于界面切换
+         */
         toggleAbout: function() {
             var currentState = $('#parchment').attr('class');
 
@@ -407,6 +535,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 关闭游戏内信用窗口
+         * 重置相关CSS类和死亡状态
+         */
         closeInGameCredits: function() {
             $('body').removeClass('credits');
             $('#parchment').removeClass('credits');
@@ -415,6 +547,10 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
         
+        /**
+         * 关闭游戏内关于窗口
+         * 重置相关CSS类、死亡状态和帮助按钮状态
+         */
         closeInGameAbout: function() {
             $('body').removeClass('about');
             $('#parchment').removeClass('about');
@@ -424,10 +560,20 @@ define(['jquery', 'storage'], function($, Storage) {
             $('#helpbutton').removeClass('active');
         },
         
+        /**
+         * 切换人口信息显示/隐藏
+         * 控制人口统计信息的可见性
+         */
         togglePopulationInfo: function() {
             $('#population').toggleClass('visible');
         },
 
+        /**
+         * 打开弹出窗口
+         * 创建指定类型的社交分享弹窗并居中定位
+         * @param {string} type - 弹窗类型 ('twitter' 或 'facebook')
+         * @param {string} url - 分享URL
+         */
         openPopup: function(type, url) {
             var h = $(window).height(),
                 w = $(window).width(),
@@ -454,8 +600,14 @@ define(['jquery', 'storage'], function($, Storage) {
         	if (window.focus) {newwindow.focus()}
         },
 
+        /**
+         * 动画化羊皮纸切换
+         * 处理不同设备类型下的界面切换动画效果
+         * @param {string} origin - 源状态类名
+         * @param {string} destination - 目标状态类名
+         */
         animateParchment: function(origin, destination) {
-            var self = this,
+            let self = this,
                 $parchment = $('#parchment'),
                 duration = 1;
 
@@ -483,22 +635,35 @@ define(['jquery', 'storage'], function($, Storage) {
             }
         },
 
+        /**
+         * 动画化消息显示
+         * 将通知消息移动到屏幕顶部显示
+         */
         animateMessages: function() {
-            var $messages = $('#notifications div');
+            let $messages = $('#notifications div');
 
             $messages.addClass('top');
         },
 
+        /**
+         * 重置消息位置
+         * 将消息从顶部移回原始位置并交换消息内容
+         */
         resetMessagesPosition: function() {
-            var message = $('#message2').text();
+            let message = $('#message2').text();
 
             $('#notifications div').removeClass('top');
             $('#message2').text('');
             $('#message1').text(message);
         },
 
+        /**
+         * 显示消息通知
+         * 在界面上显示临时消息并设置自动隐藏计时器
+         * @param {string} message - 要显示的消息内容
+         */
         showMessage: function(message) {
-            var $wrapper = $('#notifications div'),
+            let $wrapper = $('#notifications div'),
                 $message = $('#notifications #message2');
 
             this.animateMessages();
@@ -512,10 +677,18 @@ define(['jquery', 'storage'], function($, Storage) {
             }, 5000);
         },
 
+        /**
+         * 重置消息计时器
+         * 清除当前的消息自动隐藏定时器
+         */
         resetMessageTimer: function() {
             clearTimeout(this.messageTimer);
         },
         
+        /**
+         * 调整UI尺寸
+         * 根据当前游戏状态重新调整渲染器和UI元素尺寸
+         */
         resizeUi: function() {
             if(this.game) {
                 if(this.game.started) {
