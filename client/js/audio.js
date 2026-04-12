@@ -1,7 +1,19 @@
 
+/**
+ * 音频管理模块
+ * 管理游戏中的音效和背景音乐播放
+ */
 define(['area'], function(Area) {
 
+    /**
+     * AudioManager类 - 音频管理器
+     * 负责加载、播放和管理游戏中的音效和背景音乐
+     */
     var AudioManager = Class.extend({
+        /**
+         * 初始化音频管理器
+         * @param {Object} game - 游戏实例对象
+         */
         init: function(game) {
             var self = this;
         
@@ -48,6 +60,10 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 切换音频开关状态
+         * 开启时会恢复背景音乐，关闭时会停止当前音乐
+         */
         toggle: function() {
             if(this.enabled) {
                 this.enabled = false;
@@ -65,6 +81,13 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 加载音频文件
+         * @param {string} basePath - 音频文件基础路径
+         * @param {string} name - 音频文件名称
+         * @param {Function} loaded_callback - 加载完成回调函数
+         * @param {number} channels - 音频通道数量（用于同时播放多个相同音效）
+         */
         load: function (basePath, name, loaded_callback, channels) {
             var path = basePath + name + "." + this.extension,
                 sound = document.createElement('audio'),
@@ -93,10 +116,20 @@ define(['area'], function(Area) {
             });
         },
     
+        /**
+         * 加载音效文件
+         * @param {string} name - 音效名称
+         * @param {Function} handleLoaded - 加载完成回调函数
+         */
         loadSound: function(name, handleLoaded) {
             this.load("audio/sounds/", name, handleLoaded, 4);
         },
     
+        /**
+         * 加载背景音乐文件
+         * @param {string} name - 音乐名称
+         * @param {Function} handleLoaded - 加载完成回调函数
+         */
         loadMusic: function(name, handleLoaded) {
             this.load("audio/music/", name, handleLoaded, 1);
             var music = this.sounds[name][0];
@@ -104,6 +137,12 @@ define(['area'], function(Area) {
             music.addEventListener('ended', function() { music.play() }, false);
         },
     
+        /**
+         * 获取可用的音频对象
+         * 优先返回已播放完毕或暂停的音频，实现音频复用
+         * @param {string} name - 音频名称
+         * @returns {HTMLAudioElement|null} 音频对象，未找到返回null
+         */
         getSound: function(name) {
             if(!this.sounds[name]) {
                 return null;
@@ -119,6 +158,10 @@ define(['area'], function(Area) {
             return sound;
         },
     
+        /**
+         * 播放音效
+         * @param {string} name - 音效名称
+         */
         playSound: function(name) {
             var sound = this.enabled && this.getSound(name);
             if(sound) {
@@ -126,12 +169,27 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 添加音乐区域
+         * 当玩家进入该区域时播放对应的背景音乐
+         * @param {number} x - 区域左上角X坐标
+         * @param {number} y - 区域左上角Y坐标
+         * @param {number} width - 区域宽度
+         * @param {number} height - 区域高度
+         * @param {string} musicName - 该区域对应的音乐名称
+         */
         addArea: function(x, y, width, height, musicName) {
             var area = new Area(x, y, width, height);
             area.musicName = musicName;
             this.areas.push(area);
         },
     
+        /**
+         * 获取实体周围的音乐
+         * 根据实体位置查找其所在的音乐区域
+         * @param {Object} entity - 游戏实体对象
+         * @returns {Object|null} 音乐对象 {sound, name}，未找到返回null
+         */
         getSurroundingMusic: function(entity) {
             var music = null,
                 area = _.detect(this.areas, function(area) {
@@ -144,6 +202,10 @@ define(['area'], function(Area) {
             return music;
         },
     
+        /**
+         * 更新背景音乐
+         * 根据玩家当前位置切换背景音乐
+         */
         updateMusic: function() {
             if(this.enabled) {
                 var music = this.getSurroundingMusic(this.game.player);
@@ -161,10 +223,19 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 检查是否为当前播放的音乐
+         * @param {Object} music - 音乐对象
+         * @returns {boolean} 是否为当前音乐
+         */
         isCurrentMusic: function(music) {
             return this.currentMusic && (music.name === this.currentMusic.name);
         },
     
+        /**
+         * 播放背景音乐
+         * @param {Object} music - 音乐对象 {sound, name}
+         */
         playMusic: function(music) {
             if(this.enabled && music && music.sound) {
                 if(music.sound.fadingOut) {
@@ -177,6 +248,10 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 重置音乐到初始状态
+         * @param {Object} music - 音乐对象
+         */
         resetMusic: function(music) {
             if(music && music.sound && music.sound.readyState > 0) {
                 music.sound.pause();
@@ -184,6 +259,11 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 淡出音乐
+         * @param {Object} music - 音乐对象
+         * @param {Function} ended_callback - 淡出完成回调函数
+         */
         fadeOutMusic: function(music, ended_callback) {
             var self = this;
             if(music && !music.sound.fadingOut) {
@@ -203,6 +283,10 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 淡入音乐
+         * @param {Object} music - 音乐对象
+         */
         fadeInMusic: function(music) {
             var self = this;
             if(music && !music.sound.fadingIn) {
@@ -221,6 +305,10 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 清除淡出效果定时器
+         * @param {Object} music - 音乐对象
+         */
         clearFadeOut: function(music) {
             if(music.sound.fadingOut) {
                 clearInterval(music.sound.fadingOut);
@@ -228,6 +316,10 @@ define(['area'], function(Area) {
             }
         },
         
+        /**
+         * 清除淡入效果定时器
+         * @param {Object} music - 音乐对象
+         */
         clearFadeIn: function(music) {
             if(music.sound.fadingIn) {
                 clearInterval(music.sound.fadingIn);
@@ -235,6 +327,9 @@ define(['area'], function(Area) {
             }
         },
     
+        /**
+         * 淡出当前背景音乐
+         */
         fadeOutCurrentMusic : function() {
             var self = this;
             if(this.currentMusic) {

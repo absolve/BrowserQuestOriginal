@@ -1,3 +1,8 @@
+/**
+ * 地图处理模块
+ * 解析Tiled地图编辑器导出的JSON格式地图数据
+ * 根据运行模式（客户端/服务器端）提取不同的地图信息
+ */
 
 var Log = require('log'),
     _ = require('underscore'),
@@ -10,6 +15,13 @@ var map,
     staticEntities = {},
     mobsFirstgid;
 
+/**
+ * 处理地图JSON数据
+ * @param {Object} json - Tiled地图JSON数据
+ * @param {Object} options - 配置选项
+ * @param {string} options.mode - 运行模式："client" 或 "server"
+ * @returns {Object} 处理后的地图数据对象
+ */
 module.exports = function processMap(json, options) {
     var self = this,
         Tiled = json.map,
@@ -235,6 +247,10 @@ module.exports = function processMap(json, options) {
     return map;
 };
 
+/**
+ * 处理单个图层
+ * @param {Object} layer - Tiled图层对象
+ */
 var processLayer = function processLayer(layer) {
     if(mode === "server") {
         // Mobs

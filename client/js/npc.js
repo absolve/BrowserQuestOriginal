@@ -1,6 +1,14 @@
 
+/**
+ * NPC模块
+ * 定义客户端非玩家角色实体类和对话内容
+ */
 define(['character'], function(Character) {
 
+    /**
+     * NPC对话内容配置
+     * 每个NPC类型对应一个对话数组，玩家与NPC交互时会依次显示这些对话
+     */
     var NpcTalk = {
         "guard": [
             "Hello there",
@@ -161,7 +169,17 @@ define(['character'], function(Character) {
         ]
     };
 
+    /**
+     * Npc类 - 客户端非玩家角色
+     * 继承自Character基类，表示游戏中的NPC实体
+     * @extends Character
+     */
     var Npc = Character.extend({
+        /**
+         * 初始化NPC实例
+         * @param {number} id - NPC的唯一标识符
+         * @param {number} kind - NPC的种类ID
+         */
         init: function(id, kind) {
             this._super(id, kind, 1);
             this.itemKind = Types.getKindAsString(this.kind);
@@ -169,6 +187,11 @@ define(['character'], function(Character) {
             this.talkIndex = 0;
         },
     
+        /**
+         * 获取NPC的下一条对话内容
+         * 对话会循环播放，当对话索引超过对话总数时重置为0
+         * @returns {string|null} 对话内容字符串，如果没有更多对话则返回null
+         */
         talk: function() {
             var msg = null;
         
