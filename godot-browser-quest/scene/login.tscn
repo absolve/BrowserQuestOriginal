@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://c82xqv7bdnklh"]
+
+[ext_resource type="Script" uid="uid://cxciysisov687" path="res://script/login.gd" id="1_mc475"]
+
+[node name="login" type="Node2D" unique_id=264499872]
+script = ExtResource("1_mc475")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1567167106]
+
+[node name="Control" type="Control" parent="." unique_id=235339616]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureButton" type="TextureButton" parent="Control" unique_id=613553067]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
