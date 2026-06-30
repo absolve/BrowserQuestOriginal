@@ -52,6 +52,66 @@ You might want to host a webserver and open index.html in that (e.g. 127.0.0.1/i
 Also read the original README files you'll find inside the Client and Server folders to learn the basics of configuring (it's preconfigured right now).
 
 
+Server Flow Diagrams
+============
+
+## 启动流程图
+
+```mermaid
+flowchart TD
+    A[读取配置文件] --> B[创建 WebSocket / Socket.IO 服务]
+    B --> C[创建多个 WorldServer 实例]
+    C --> D[加载地图数据]
+    D --> E[初始化区域、怪物、宝箱和静态实体]
+    E --> F[启动世界更新循环]
+    F --> G[客户端建立连接]
+    G --> H[分配玩家到某个世界]
+    H --> I[创建 Player 对象]
+    I --> J[完成握手并发送 WELCOME]
+```
+
+这条链路说明了服务端从配置加载到世界运行，再到玩家进入游戏的整体启动过程。
+
+## 消息协议流程图
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant P as Player
+    participant W as WorldServer
+
+    C->>P: 发送 HELLO / MOVE / ATTACK / LOOT / CHAT 等消息
+    P->>P: 校验消息格式和合法性
+    P->>W: 转发到世界服务器处理
+    W->>W: 更新实体状态、世界状态或广播事件
+    W->>C: 返回 WELCOME / Spawn / Move / Attack / Chat 等消息
+```
+
+服务端并不是直接处理所有内容，而是先由 Player 层解析客户端消息，再由 WorldServer 统一进行游戏逻辑更新和广播。
+
+## 玩家进入游戏的完整链路
+
+```mermaid
+flowchart LR
+    A[客户端连接成功] --> B[服务端创建 Socket 连接]
+    B --> C[创建 Player 实例]
+    C --> D[接收 HELLO 消息]
+    D --> E[解析玩家名称、装备和初始位置]
+    E --> F[调用 world.addPlayer]
+    F --> G[触发 Player Enter 逻辑]
+    G --> H[推送 WELCOME 和当前可见实体列表]
+    H --> I[玩家正式进入游戏]
+```
+
+完整链路可以概括为：
+1. 客户端发起连接。
+2. 服务端创建 Player 对象并绑定网络连接。
+3. 收到 HELLO 后完成角色初始化。
+4. 将玩家注册到对应世界中。
+5. 触发进入世界逻辑并广播初始状态。
+6. 玩家开始参与移动、战斗、聊天和拾取等交互。
+
+
 Original README
 ============
 BrowserQuest is a HTML5/JavaScript multiplayer game experiment.
