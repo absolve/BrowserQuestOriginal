@@ -1,19 +1,62 @@
 [gd_scene format=3 uid="uid://c82xqv7bdnklh"]
 
 [ext_resource type="Script" uid="uid://cxciysisov687" path="res://script/login.gd" id="1_mc475"]
+[ext_resource type="Texture2D" uid="uid://bul048ilptcfe" path="res://sprite/1t.png" id="2_76uxg"]
+[ext_resource type="Texture2D" uid="uid://ytci7eg4dv8n" path="res://sprite/wood.png" id="2_ayshr"]
+[ext_resource type="Texture2D" uid="uid://rij6wiqvy6jn" path="res://sprite/3.png" id="2_xhhai"]
+[ext_resource type="Texture2D" uid="uid://c7lr1gvfp38mx" path="res://sprite/8.png" id="4_i5fi3"]
+[ext_resource type="Texture2D" uid="uid://b84hih52ndbqq" path="res://sprite/10.png" id="5_ayshr"]
+[ext_resource type="Texture2D" uid="uid://b0ak2ti3dcc6a" path="res://sprite/9.png" id="6_m7twt"]
 
 [node name="login" type="Node2D" unique_id=264499872]
 script = ExtResource("1_mc475")
 
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1677086596]
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_ayshr")
+stretch_mode = 1
+
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1567167106]
+position = Vector2(955, 168)
+texture = ExtResource("2_76uxg")
+
+[node name="panel" type="Sprite2D" parent="." unique_id=1761226653]
+position = Vector2(950, 597)
+texture = ExtResource("2_xhhai")
 
 [node name="Control" type="Control" parent="." unique_id=235339616]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Control" unique_id=1775862222]
+layout_mode = 0
+offset_left = 880.0
+offset_top = 440.0
+offset_right = 967.0
+offset_bottom = 463.0
+text = "hello world"
 
 [node name="TextureButton" type="TextureButton" parent="Control" unique_id=613553067]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 18.6
+anchor_top = 21.8
+anchor_right = 27.0
+anchor_bottom = 24.625
 offset_right = 40.0
 offset_bottom = 40.0
+texture_normal = ExtResource("4_i5fi3")
+texture_pressed = ExtResource("5_ayshr")
+texture_disabled = ExtResource("6_m7twt")
+metadata/_edit_use_anchors_ = true
+
+[node name="LineEdit" type="LineEdit" parent="Control" unique_id=355470719]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 656.0
+offset_right = 1256.0
+offset_bottom = 704.0
