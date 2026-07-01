@@ -1,3 +1,7 @@
 [gd_resource type="Theme" format=3 uid="uid://cdbd14vvwax4u"]
 
+[ext_resource type="FontFile" uid="uid://caroy3nav5jlp" path="res://font/AlibabaPuHuiTi-3-85-Bold.ttf" id="1_f7io8"]
+
 [resource]
+default_font = ExtResource("1_f7io8")
+default_font_size = 20

@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bpkypcssqe1jo"]
+
+[ext_resource type="Script" uid="uid://dip66wo1tox6d" path="res://autoload/networkManager.gd" id="1_nxx4f"]
+[ext_resource type="Script" uid="uid://d1grrdbj6fqxr" path="res://addons/godot-socketio/socketio.gd" id="2_tkgky"]
+
+[node name="NetworkManager" type="Node2D" unique_id=113074544]
+script = ExtResource("1_nxx4f")
+
+[node name="SocketIO" type="Node" parent="." unique_id=1034196185]
+script = ExtResource("2_tkgky")
+metadata/_custom_type_script = "uid://d1grrdbj6fqxr"
+
+[connection signal="event_received" from="SocketIO" to="." method="_on_event_received"]
+[connection signal="socket_connected" from="SocketIO" to="." method="_on_socket_connected"]
