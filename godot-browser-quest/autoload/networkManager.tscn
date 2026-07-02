@@ -12,3 +12,4 @@ metadata/_custom_type_script = "uid://d1grrdbj6fqxr"
 
 [connection signal="event_received" from="SocketIO" to="." method="_on_event_received"]
 [connection signal="socket_connected" from="SocketIO" to="." method="_on_socket_connected"]
+[connection signal="socket_disconnected" from="SocketIO" to="." method="_on_socket_io_socket_disconnected"]

@@ -6,6 +6,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
               Item, Mob, Npc, Player, Character, Chest, Mobs, Exceptions, config) {
 
         var Game = Class.extend({
+            /**
+             * 初始化。
+             */
             init: function (app) {
                 this.app = app;
                 this.app.config = config;
@@ -70,36 +73,60 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                     "item-platearmor", "item-redarmor", "item-goldenarmor", "item-flask", "item-cake", "item-burger", "morningstar", "item-morningstar", "item-firepotion"];
             },
 
+            /**
+             * 处理。
+             */
             setup: function ($bubbleContainer, canvas, background, foreground, input) {
                 this.setBubbleManager(new BubbleManager($bubbleContainer));
                 this.setRenderer(new Renderer(this, canvas, background, foreground));
                 this.setChatInput(input);
             },
 
+            /**
+             * 设置存储。
+             */
             setStorage: function (storage) {
                 this.storage = storage;
             },
 
+            /**
+             * 设置渲染器。
+             */
             setRenderer: function (renderer) {
                 this.renderer = renderer;
             },
 
+            /**
+             * 设置updater。
+             */
             setUpdater: function (updater) {
                 this.updater = updater;
             },
 
+            /**
+             * 设置寻路器。
+             */
             setPathfinder: function (pathfinder) {
                 this.pathfinder = pathfinder;
             },
 
+            /**
+             * 设置聊天input。
+             */
             setChatInput: function (element) {
                 this.chatinput = element;
             },
 
+            /**
+             * 设置气泡管理器。
+             */
             setBubbleManager: function (bubbleManager) {
                 this.bubbleManager = bubbleManager;
             },
 
+            /**
+             * 加载地图。
+             */
             loadMap: function () {
                 var self = this;
 
@@ -112,6 +139,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 });
             },
 
+            /**
+             * 初始化玩家。
+             */
             initPlayer: function () {
                 if (this.storage.hasAlreadyPlayed()) {
                     this.player.setSpriteName(this.storage.data.player.armor);
@@ -124,11 +154,17 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.debug("Finished initPlayer");
             },
 
+            /**
+             * 初始化shadows。
+             */
             initShadows: function () {
                 this.shadows = {};
                 this.shadows["small"] = this.sprites["shadow16"];
             },
 
+            /**
+             * 初始化cursors。
+             */
             initCursors: function () {
                 this.cursors["hand"] = this.sprites["hand"];
                 this.cursors["sword"] = this.sprites["sword"];
@@ -138,6 +174,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 this.cursors["talk"] = this.sprites["talk"];
             },
 
+            /**
+             * 初始化animations。
+             */
             initAnimations: function () {
                 this.targetAnimation = new Animation("idle_down", 4, 0, 16, 16);
                 this.targetAnimation.setSpeed(50);
@@ -146,6 +185,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 this.sparksAnimation.setSpeed(120);
             },
 
+            /**
+             * 初始化受伤精灵。
+             */
             initHurtSprites: function () {
                 let self = this;
 
@@ -154,6 +196,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 });
             },
 
+            /**
+             * 初始化silhouettes。
+             */
             initSilhouettes: function () {
                 let self = this;
 
@@ -164,6 +209,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 self.sprites["item-cake"].createSilhouette();
             },
 
+            /**
+             * 初始化成就。
+             */
             initAchievements: function () {
                 let self = this;
 
@@ -306,6 +354,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 获取成就byid。
+             */
             getAchievementById: function (id) {
                 var found = null;
                 _.each(this.achievements, function (achievement, key) {
@@ -316,6 +367,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return found;
             },
 
+            /**
+             * 加载精灵。
+             */
             loadSprite: function (name) {
                 if (this.renderer.upscaledRendering) {
                     this.spritesets[0][name] = new Sprite(name, 1);
@@ -327,6 +381,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 设置精灵缩放。
+             */
             setSpriteScale: function (scale) {
                 var self = this;
 
@@ -345,6 +402,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 加载精灵。
+             */
             loadSprites: function () {
                 log.info("Loading sprites...");
                 this.spritesets = [];
@@ -354,6 +414,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 _.map(this.spriteNames, this.loadSprite, this);
             },
 
+            /**
+             * 处理loaded。
+             */
             spritesLoaded: function () {
                 return !_.any(this.sprites, function (sprite) {
                     return !sprite.isLoaded;
@@ -361,6 +424,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
 
             },
 
+            /**
+             * 设置光标。
+             */
             setCursor: function (name, orientation) {
                 if (name in this.cursors) {
                     this.currentCursor = this.cursors[name];
@@ -370,6 +436,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 更新光标logic。
+             */
             updateCursorLogic: function () {
                 if (this.hoveringCollidingTile && this.started) {
                     this.targetColor = "rgba(255, 50, 50, 0.5)";
@@ -396,10 +465,16 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 聚焦玩家。
+             */
             focusPlayer: function () {
                 this.renderer.camera.lookAt(this.player);
             },
 
+            /**
+             * 添加实体。
+             */
             addEntity: function (entity) {
                 let self = this;
 
@@ -425,6 +500,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 移除实体。
+             */
             removeEntity: function (entity) {
                 if (entity.id in this.entities) {
                     this.unregisterEntityPosition(entity);
@@ -434,6 +512,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 添加物品。
+             */
             addItem: function (item, x, y) {
                 item.setSprite(this.sprites[item.getSpriteName()]);
                 item.setGridPosition(x, y);
@@ -441,6 +522,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 this.addEntity(item);
             },
 
+            /**
+             * 移除物品。
+             */
             removeItem: function (item) {
                 if (item) {
                     this.removeFromItemGrid(item, item.gridX, item.gridY);
@@ -451,6 +535,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 初始化寻路网格。
+             */
             initPathingGrid: function () {
                 this.pathingGrid = [];
                 for (var i = 0; i < this.map.height; i += 1) {
@@ -462,6 +549,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.info("Initialized the pathing grid with static colliding cells.");
             },
 
+            /**
+             * 初始化实体网格。
+             */
             initEntityGrid: function () {
                 this.entityGrid = [];
                 for (var i = 0; i < this.map.height; i += 1) {
@@ -473,6 +563,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.info("Initialized the entity grid.");
             },
 
+            /**
+             * 初始化rendering网格。
+             */
             initRenderingGrid: function () {
                 this.renderingGrid = [];
                 for (var i = 0; i < this.map.height; i += 1) {
@@ -484,6 +577,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.info("Initialized the rendering grid.");
             },
 
+            /**
+             * 初始化物品网格。
+             */
             initItemGrid: function () {
                 this.itemGrid = [];
                 for (var i = 0; i < this.map.height; i += 1) {
@@ -516,30 +612,45 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 //log.info("Initialized animated tiles.");
             },
 
+            /**
+             * 添加torendering网格。
+             */
             addToRenderingGrid: function (entity, x, y) {
                 if (!this.map.isOutOfBounds(x, y)) {
                     this.renderingGrid[y][x][entity.id] = entity;
                 }
             },
 
+            /**
+             * 移除fromrendering网格。
+             */
             removeFromRenderingGrid: function (entity, x, y) {
                 if (entity && this.renderingGrid[y][x] && entity.id in this.renderingGrid[y][x]) {
                     delete this.renderingGrid[y][x][entity.id];
                 }
             },
 
+            /**
+             * 移除from实体网格。
+             */
             removeFromEntityGrid: function (entity, x, y) {
                 if (this.entityGrid[y][x][entity.id]) {
                     delete this.entityGrid[y][x][entity.id];
                 }
             },
 
+            /**
+             * 移除from物品网格。
+             */
             removeFromItemGrid: function (item, x, y) {
                 if (item && this.itemGrid[y][x][item.id]) {
                     delete this.itemGrid[y][x][item.id];
                 }
             },
 
+            /**
+             * 移除from寻路网格。
+             */
             removeFromPathingGrid: function (x, y) {
                 this.pathingGrid[y][x] = 0;
             },
@@ -585,6 +696,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 注册实体位置。
+             */
             registerEntityPosition: function (entity) {
                 var x = entity.gridX,
                     y = entity.gridY;
@@ -604,16 +718,25 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 设置服务器选项。
+             */
             setServerOptions: function (host, port, username) {
                 this.host = host;
                 this.port = port;
                 this.username = username;
             },
 
+            /**
+             * 加载音频。
+             */
             loadAudio: function () {
                 this.audioManager = new AudioManager(this);
             },
 
+            /**
+             * 初始化音乐areas。
+             */
             initMusicAreas: function () {
                 var self = this;
                 _.each(this.map.musicAreas, function (area) {
@@ -621,6 +744,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 });
             },
 
+            /**
+             * 处理。
+             */
             run: function (started_callback) {
                 var self = this;
 
@@ -714,15 +840,24 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.info("Game loop started.");
             },
 
+            /**
+             * 停止。
+             */
             stop: function () {
                 log.info("Game stopped.");
                 this.isStopped = true;
             },
 
+            /**
+             * 处理idexists。
+             */
             entityIdExists: function (id) {
                 return id in this.entities;
             },
 
+            /**
+             * 获取实体byid。
+             */
             getEntityById: function (id) {
                 if (id in this.entities) {
                     return this.entities[id];
@@ -731,6 +866,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 处理。
+             */
             connect: function (started_callback) {
                 let self = this,
                     connecting = false; // always in dispatcher mode in the build version
@@ -1738,6 +1876,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 执行玩家open宝箱。
+             */
             makePlayerOpenChest: function (chest) {
                 if (chest) {
                     this.player.setTarget(chest);
@@ -1887,6 +2028,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return entity;
             },
 
+            /**
+             * 获取怪物at。
+             */
             getMobAt: function (x, y) {
                 var entity = this.getEntityAt(x, y);
                 if (entity && (entity instanceof Mob)) {
@@ -1895,6 +2039,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return null;
             },
 
+            /**
+             * 获取NPCat。
+             */
             getNpcAt: function (x, y) {
                 var entity = this.getEntityAt(x, y);
                 if (entity && (entity instanceof Npc)) {
@@ -1903,6 +2050,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return null;
             },
 
+            /**
+             * 获取宝箱at。
+             */
             getChestAt: function (x, y) {
                 var entity = this.getEntityAt(x, y);
                 if (entity && (entity instanceof Chest)) {
@@ -1911,6 +2061,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return null;
             },
 
+            /**
+             * 获取物品at。
+             */
             getItemAt: function (x, y) {
                 if (this.map.isOutOfBounds(x, y) || !this.itemGrid) {
                     return null;
@@ -1943,18 +2096,30 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return !_.isNull(this.getEntityAt(x, y));
             },
 
+            /**
+             * 判断是否怪物at。
+             */
             isMobAt: function (x, y) {
                 return !_.isNull(this.getMobAt(x, y));
             },
 
+            /**
+             * 判断是否物品at。
+             */
             isItemAt: function (x, y) {
                 return !_.isNull(this.getItemAt(x, y));
             },
 
+            /**
+             * 判断是否NPCat。
+             */
             isNpcAt: function (x, y) {
                 return !_.isNull(this.getNpcAt(x, y));
             },
 
+            /**
+             * 判断是否宝箱at。
+             */
             isChestAt: function (x, y) {
                 return !_.isNull(this.getChestAt(x, y));
             },
@@ -2087,6 +2252,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 判断是否怪物onsame瓦片。
+             */
             isMobOnSameTile: function (mob, x, y) {
                 var X = x || mob.gridX,
                     Y = y || mob.gridY,
@@ -2101,6 +2269,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return result;
             },
 
+            /**
+             * 获取freeadjacentnondiagonal位置。
+             */
             getFreeAdjacentNonDiagonalPosition: function (entity) {
                 var self = this,
                     result = null;
@@ -2113,6 +2284,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return result;
             },
 
+            /**
+             * 尝试movingtoadifferent瓦片。
+             */
             tryMovingToADifferentTile: function (character) {
                 var attacker = character,
                     target = character.target;
@@ -2260,6 +2434,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return orientation;
             },
 
+            /**
+             * 开始分区from。
+             */
             startZoningFrom: function (x, y) {
                 this.zoningOrientation = this.getZoningOrientation(x, y);
 
@@ -2293,6 +2470,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 this.client.sendZone();
             },
 
+            /**
+             * 处理分区from。
+             */
             enqueueZoningFrom: function (x, y) {
                 this.zoningQueue.push({x: x, y: y});
 
@@ -2301,6 +2481,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 处理分区。
+             */
             endZoning: function () {
                 this.currentZoning = null;
                 this.resetZone();
@@ -2312,33 +2495,54 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 判断是否分区。
+             */
             isZoning: function () {
                 return !_.isNull(this.currentZoning);
             },
 
+            /**
+             * 重置区域。
+             */
             resetZone: function () {
                 this.bubbleManager.clean();
                 this.initAnimatedTiles();
                 this.renderer.renderStaticCanvases();
             },
 
+            /**
+             * 重置摄像机。
+             */
             resetCamera: function () {
                 this.camera.focusEntity(this.player);
                 this.resetZone();
             },
 
+            /**
+             * 发送。
+             */
             say: function (message) {
                 this.client.sendChat(message);
             },
 
+            /**
+             * 创建气泡。
+             */
             createBubble: function (id, message) {
                 this.bubbleManager.create(id, message, this.currentTime);
             },
 
+            /**
+             * 处理气泡。
+             */
             destroyBubble: function (id) {
                 this.bubbleManager.destroyBubble(id);
             },
 
+            /**
+             * 分配气泡to。
+             */
             assignBubbleTo: function (character) {
                 var bubble = this.bubbleManager.getBubbleById(character.id);
 
@@ -2372,6 +2576,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 重启。
+             */
             restart: function () {
                 log.debug("Beginning restart");
 
@@ -2396,42 +2603,72 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 log.debug("Finished restart");
             },
 
+            /**
+             * 注册gamestart。
+             */
             onGameStart: function (callback) {
                 this.gamestart_callback = callback;
             },
 
+            /**
+             * 注册disconnect。
+             */
             onDisconnect: function (callback) {
                 this.disconnect_callback = callback;
             },
 
+            /**
+             * 注册玩家死亡。
+             */
             onPlayerDeath: function (callback) {
                 this.playerdeath_callback = callback;
             },
 
+            /**
+             * 注册玩家healthchange。
+             */
             onPlayerHealthChange: function (callback) {
                 this.playerhp_callback = callback;
             },
 
+            /**
+             * 注册玩家受伤。
+             */
             onPlayerHurt: function (callback) {
                 this.playerhurt_callback = callback;
             },
 
+            /**
+             * 注册玩家equipmentchange。
+             */
             onPlayerEquipmentChange: function (callback) {
                 this.equipment_callback = callback;
             },
 
+            /**
+             * 注册nbplayerschange。
+             */
             onNbPlayersChange: function (callback) {
                 this.nbplayers_callback = callback;
             },
 
+            /**
+             * 注册通知。
+             */
             onNotification: function (callback) {
                 this.notification_callback = callback;
             },
 
+            /**
+             * 注册玩家invincible。
+             */
             onPlayerInvincible: function (callback) {
                 this.invincible_callback = callback
             },
 
+            /**
+             * 处理。
+             */
             resize: function () {
                 var x = this.camera.x,
                     y = this.camera.y,
@@ -2445,12 +2682,18 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 this.renderer.renderStaticCanvases();
             },
 
+            /**
+             * 更新bars。
+             */
             updateBars: function () {
                 if (this.player && this.playerhp_callback) {
                     this.playerhp_callback(this.player.hitPoints, this.player.maxHitPoints);
                 }
             },
 
+            /**
+             * 获取dead怪物位置。
+             */
             getDeadMobPosition: function (mobId) {
                 var position;
 
@@ -2462,10 +2705,16 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 return position;
             },
 
+            /**
+             * 注册成就unlock。
+             */
             onAchievementUnlock: function (callback) {
                 this.unlock_callback = callback;
             },
 
+            /**
+             * 尝试unlocking成就。
+             */
             tryUnlockingAchievement: function (name) {
                 var achievement = null;
                 if (name in this.achievements) {
@@ -2480,12 +2729,18 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 显示通知。
+             */
             showNotification: function (message) {
                 if (this.notification_callback) {
                     this.notification_callback(message);
                 }
             },
 
+            /**
+             * 移除obsolete实体。
+             */
             removeObsoleteEntities: function () {
                 var nb = _.size(this.obsoleteEntities),
                     self = this;
@@ -2525,6 +2780,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 更新玩家checkpoint。
+             */
             updatePlayerCheckpoint: function () {
                 var checkpoint = this.map.getCurrentCheckpoint(this.player);
 
@@ -2537,6 +2795,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 检查underground成就。
+             */
             checkUndergroundAchievement: function () {
                 var music = this.audioManager.getSurroundingMusic(this.player);
 
@@ -2547,6 +2808,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 遍历实体around。
+             */
             forEachEntityAround: function (x, y, r, callback) {
                 for (var i = x - r, max_i = x + r; i <= max_i; i += 1) {
                     for (var j = y - r, max_j = y + r; j <= max_j; j += 1) {
@@ -2559,6 +2823,9 @@ define(['infomanager', 'bubble', 'renderer', 'map', 'animation', 'sprite', 'tile
                 }
             },
 
+            /**
+             * 检查other脏rects。
+             */
             checkOtherDirtyRects: function (r1, source, x, y) {
                 var r = this.renderer;
 
