@@ -903,7 +903,7 @@ module.exports = World = cls.Class.extend({
                 var spawns = [];
                 // 检查当前组是否有传入的实体需要处理
                 if (self.groups[id].incoming.length > 0) {
-                    log.debug("processGroups" + self.groups)
+                    // log.debug("processGroups" + self.groups)
                     // 遍历传入实体数组，为每个实体创建Spawn消息
                     spawns = _.each(self.groups[id].incoming, function (entity) {
                         // 根据实体类型（玩家或其他）创建相应的Spawn消息并推送到组中
