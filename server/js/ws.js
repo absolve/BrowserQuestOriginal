@@ -195,8 +195,8 @@ WS.socketIOServer = Server.extend({
         // self.io = require('socket.io')(http);
         self.io = require('socket.io')(http, {
             cors: {
-                origin: 'http://localhost:9000',
-
+                // origin: 'http://localhost:9000',
+                origin: true,
                 credentials: true,
             }
         });

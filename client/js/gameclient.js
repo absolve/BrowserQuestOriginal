@@ -63,10 +63,9 @@ define(['player', 'entityfactory', 'lib/bison'], function(Player, EntityFactory,
          * @param {boolean} dispatcherMode - 是否使用调度器模式连接
          */
         connect: function(dispatcherMode) {
-             var url = "http://" + this.host + ":" + this.port + "/",
+             var url = "http://" + this.host + ":" + this.port ,
                 self = this;
-
-             console.log("connect")
+             console.log("connect "+url)
             this.connection = io(url, {'force new connection':true});
             this.connection.on('connection', function(socket){
                 log.info("Connected to server " + url);
